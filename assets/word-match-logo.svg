@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="单词消消乐">
+  <rect x="18" y="12" width="124" height="132" rx="34" fill="#58CC02"/>
+  <path d="M25 118c10 16 29 26 55 26s45-10 55-26v10c0 14-25 25-55 25s-55-11-55-25v-10z" fill="#46A302"/>
+  <rect x="38" y="38" width="84" height="72" rx="18" fill="#FFFFFF" stroke="#46A302" stroke-width="8"/>
+  <rect x="48" y="52" width="28" height="16" rx="8" fill="#FFC800"/>
+  <rect x="84" y="52" width="28" height="16" rx="8" fill="#1CB0F6"/>
+  <rect x="48" y="78" width="64" height="12" rx="6" fill="#E5E5E5"/>
+  <path d="M54 118h52c5 0 9-4 9-9v-4H45v4c0 5 4 9 9 9z" fill="#46A302" opacity=".28"/>
+  <text x="80" y="104" text-anchor="middle" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="46" font-weight="900" fill="#3C3C3C">W</text>
+  <circle cx="124" cy="38" r="16" fill="#FFC800" stroke="#D6A900" stroke-width="6"/>
+</svg>

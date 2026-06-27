@@ -1953,6 +1953,198 @@
             from { transform: rotate(-5deg) translateY(0); }
             to { transform: rotate(3deg) translateY(-5px); }
         }
+
+        /* === Economy: Header badges === */
+        .header-economy {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .economy-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+        .economy-badge.coins { color: #d4a017; border-color: #f0d060; }
+        .economy-badge.gems { color: #8b5cf6; border-color: #c4b5fd; }
+        .economy-badge.level { color: var(--primary-dark); border-color: var(--primary); font-size: 12px; }
+
+        /* === Economy: Start screen additions === */
+        .economy-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0 6px;
+            flex-wrap: wrap;
+        }
+        .level-card {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 10px 16px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .level-card .lv-title {
+            font-size: 15px;
+            font-weight: 1000;
+            color: var(--primary-dark);
+        }
+        .level-card .lv-progress {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .level-bar-bg {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e8e8e8;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .level-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary), #58cc02);
+            transition: width 0.5s;
+        }
+        .shop-btn {
+            background: var(--surface);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 1000;
+            color: #d4a017;
+            cursor: pointer;
+            transition: transform 140ms ease, box-shadow 140ms ease;
+            box-shadow: var(--shadow-neutral);
+        }
+        .shop-btn:hover { transform: translateY(-2px); background: #fffaed; }
+        .shop-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* === Shop Modal === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: #fff;
+            border-radius: 24px;
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            transition: transform 0.25s;
+        }
+        .modal-overlay.open .modal-box { transform: scale(1); }
+        .modal-title {
+            font-size: 20px;
+            font-weight: 1000;
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 16px;
+        }
+        .shop-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            background: var(--surface);
+        }
+        .shop-item .item-icon { font-size: 28px; }
+        .shop-item .item-info { flex: 1; }
+        .shop-item .item-name { font-weight: 900; font-size: 15px; color: var(--dark); }
+        .shop-item .item-stock { font-size: 12px; color: var(--muted); }
+        .shop-item .buy-btn {
+            padding: 6px 14px;
+            border-radius: 12px;
+            border: 2px solid #f0d060;
+            background: #fffaed;
+            font-weight: 1000;
+            font-size: 13px;
+            color: #d4a017;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .shop-item .buy-btn:hover { background: #fff3c7; }
+        .shop-item .buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .modal-close {
+            display: block;
+            margin: 12px auto 0;
+            padding: 10px 32px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--muted);
+        }
+        .modal-close:hover { background: #f5f5f5; }
+
+        /* === Streak popup === */
+        .streak-popup {
+            text-align: center;
+        }
+        .streak-popup .streak-days {
+            font-size: 42px;
+            font-weight: 1000;
+            color: var(--primary-dark);
+        }
+        .streak-popup .streak-label {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .streak-popup .streak-rewards {
+            margin: 12px 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        .streak-popup .reward-chip {
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 14px;
+        }
+        .reward-chip.coin { background: #fffaed; color: #d4a017; border: 2px solid #f0d060; }
+        .reward-chip.gem { background: #f3f0ff; color: #8b5cf6; border: 2px solid #c4b5fd; }
+        .streak-claim-btn {
+            margin-top: 12px;
+            padding: 12px 32px;
+            border-radius: 16px;
+            border: 2px solid var(--primary-dark);
+            background: var(--primary);
+            color: #fff;
+            font-weight: 1000;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--primary-dark);
+        }
+        .streak-claim-btn:hover { filter: brightness(1.05); }
+        .streak-claim-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--primary-dark); }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { scroll-behavior: auto !important; }
             .screen, .settlement-rays, .sparkle-field span, .combo-display.active, .timer.warning { animation: none !important; }
@@ -2067,9 +2259,10 @@
                     <div class="stat-value" id="headerLevel">0/0</div>
                     <div>今日进度</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="headerScore">0</div>
-                    <div>总分</div>
+                <div class="header-economy">
+                    <div class="economy-badge level" id="headerLvBadge">Lv.1 新手上路</div>
+                    <div class="economy-badge coins" id="headerCoins">🪙 0</div>
+                    <div class="economy-badge gems" id="headerGems">💎 0</div>
                 </div>
             </div>
         </div>
@@ -2118,6 +2311,18 @@
                     词库共 <span id="totalWordsCount">100</span> 词，剩余词数约需 <strong id="daysEstimate">4</strong> 天学完
                     <div id="progressStats"></div>
                 </div>
+            </div>
+
+            <div class="economy-bar" id="economyBar">
+                <div class="level-card">
+                    <div class="lv-title" id="startLvTitle">Lv.1 新手上路</div>
+                    <div class="lv-progress" id="startLvProgress">0 / 500 分</div>
+                    <div class="level-bar-bg"><div class="level-bar-fill" id="startLvBar" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <div class="economy-bar">
+                <button class="shop-btn" onclick="openShop()">🛒 商店</button>
             </div>
 
             <button class="btn-primary" onclick="startTodayTask()">开始今日任务</button>
@@ -2229,6 +2434,27 @@
                 <button class="btn-home" id="resultHomeBtn" onclick="goHome()">返回首页</button>
                 <button class="btn-retry" id="resultContinueBtn" onclick="continueTodayTask()">继续今日任务</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div class="modal-overlay" id="shopModal">
+        <div class="modal-box">
+            <div class="modal-title">🛒 道具商店</div>
+            <div id="shopBalance" style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;">当前金币: <b id="shopCoinDisplay">0</b> 🪙</div>
+            <div id="shopItems"></div>
+            <button class="modal-close" onclick="closeShop()">关闭</button>
+        </div>
+    </div>
+
+    <!-- Streak Popup -->
+    <div class="modal-overlay" id="streakModal">
+        <div class="modal-box streak-popup">
+            <div class="modal-title">📅 每日打卡</div>
+            <div class="streak-days" id="streakDays">1</div>
+            <div class="streak-label">连续打卡天数</div>
+            <div class="streak-rewards" id="streakRewards"></div>
+            <button class="streak-claim-btn" onclick="claimStreakReward()">领取奖励</button>
         </div>
     </div>
 
@@ -12510,6 +12736,148 @@
             }
         };
 
+        // ===== Economy System (Persistent) =====
+        const ECONOMY_KEY = 'wordmatch_economy';
+        const LEVELS = [
+            { lv: 1, score: 0, title: '新手上路' },
+            { lv: 2, score: 500, title: '初窥门径' },
+            { lv: 3, score: 2000, title: '小有所成' },
+            { lv: 4, score: 5000, title: '词汇达人' },
+            { lv: 5, score: 10000, title: '学霸' },
+            { lv: 6, score: 25000, title: '词汇大师' },
+            { lv: 7, score: 50000, title: '词王' }
+        ];
+        const SHOP_ITEMS = {
+            hint:   { name: '提示', price: 10, icon: '💡' },
+            time:   { name: '加时', price: 15, icon: '⏰' },
+            shuffle:{ name: '重排', price: 20, icon: '🔀' }
+        };
+
+        const EconomySystem = {
+            data: null,
+
+            getDefault() {
+                return {
+                    coins: 0,
+                    gems: 0,
+                    totalScore: 0,
+                    streak: 0,
+                    lastPlayDate: '',
+                    shopItems: { hint: 3, time: 2, shuffle: 1 }
+                };
+            },
+
+            load() {
+                try {
+                    const stored = localStorage.getItem(ECONOMY_KEY);
+                    if (stored) {
+                        this.data = { ...this.getDefault(), ...JSON.parse(stored) };
+                        if (!this.data.shopItems) this.data.shopItems = { hint: 3, time: 2, shuffle: 1 };
+                    } else {
+                        this.data = this.getDefault();
+                    }
+                } catch (e) {
+                    this.data = this.getDefault();
+                }
+                return this.data;
+            },
+
+            save() {
+                if (!this.data) return;
+                try {
+                    localStorage.setItem(ECONOMY_KEY, JSON.stringify(this.data));
+                } catch (e) {}
+            },
+
+            addCoins(n) {
+                if (!this.data) this.load();
+                this.data.coins = Math.max(0, (this.data.coins || 0) + n);
+                this.save();
+                return this.data.coins;
+            },
+
+            addGems(n) {
+                if (!this.data) this.load();
+                this.data.gems = Math.max(0, (this.data.gems || 0) + n);
+                this.save();
+                return this.data.gems;
+            },
+
+            addScore(n) {
+                if (!this.data) this.load();
+                this.data.totalScore = (this.data.totalScore || 0) + n;
+                this.save();
+                return this.data.totalScore;
+            },
+
+            getLevel() {
+                if (!this.data) this.load();
+                const score = this.data.totalScore || 0;
+                let current = LEVELS[0];
+                for (let i = LEVELS.length - 1; i >= 0; i--) {
+                    if (score >= LEVELS[i].score) { current = LEVELS[i]; break; }
+                }
+                return current;
+            },
+
+            getNextLevel() {
+                const current = this.getLevel();
+                const idx = LEVELS.findIndex(l => l.lv === current.lv);
+                return idx < LEVELS.length - 1 ? LEVELS[idx + 1] : null;
+            },
+
+            buyItem(itemKey) {
+                if (!this.data) this.load();
+                const item = SHOP_ITEMS[itemKey];
+                if (!item) return false;
+                if (this.data.coins < item.price) return false;
+                this.data.coins -= item.price;
+                this.data.shopItems[itemKey] = (this.data.shopItems[itemKey] || 0) + 1;
+                this.save();
+                return true;
+            },
+
+            useItem(itemKey) {
+                if (!this.data) this.load();
+                if ((this.data.shopItems[itemKey] || 0) <= 0) return false;
+                this.data.shopItems[itemKey]--;
+                this.save();
+                return true;
+            },
+
+            getItemCount(itemKey) {
+                if (!this.data) this.load();
+                return this.data.shopItems[itemKey] || 0;
+            },
+
+            checkStreak() {
+                if (!this.data) this.load();
+                const today = new Date().toISOString().slice(0, 10);
+                if (this.data.lastPlayDate === today) return { isNew: false, streak: this.data.streak };
+                const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+                if (this.data.lastPlayDate === yesterday) {
+                    this.data.streak = (this.data.streak || 0) + 1;
+                } else {
+                    this.data.streak = 1;
+                }
+                this.data.lastPlayDate = today;
+                this.save();
+                return { isNew: true, streak: this.data.streak };
+            },
+
+            getStreakReward(streak) {
+                let coins = 5 + Math.min(streak, 10);
+                let gems = 0;
+                if (streak >= 3) coins += 5;
+                if (streak >= 7) gems += 1;
+                if (streak >= 30) gems += 3;
+                return { coins, gems };
+            }
+        };
+
+        // Load economy on startup
+        EconomySystem.load();
+
         // ===== Sound Effects System (Web Audio API) =====
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
@@ -13126,7 +13494,6 @@
             SFX.taskStart();
             clearInterval(state.timerInterval);
             state.currentLevel = 1;
-            state.totalScore = 0;
             state.gameScore = 0;
             state.correct = 0;
             state.wrong = 0;
@@ -13142,8 +13509,8 @@
             state.todayTaskStarted = true;
             buildTodayQueue(state.level);
             state.todayTaskTotal = state.todayQueue.length;
-            document.getElementById('headerScore').textContent = '0';
             updateTodayProgressHeader();
+            updateEconomyUI();
             startLearning();
         }
 
@@ -13296,9 +13663,9 @@
             state.totalTime += Math.min(20, state.newWordQuota * 1);
             state.totalTime += Math.min(15, state.currentWords.filter(w => w.queueReason === '错词修复').length * 2);
             state.timeLeft = state.totalTime;
-            state.hintCount = Math.max(1, Math.floor(state.wordsPerRound / 3));
-            state.timeCount = 1;
-            state.shuffleCount = 1;
+            state.hintCount = EconomySystem.getItemCount('hint');
+            state.timeCount = EconomySystem.getItemCount('time');
+            state.shuffleCount = EconomySystem.getItemCount('shuffle');
             state.gameActive = true;
 
             document.getElementById('gameScore').textContent = '0';
@@ -13746,6 +14113,7 @@
         // Power-ups
         function useHint() {
             if (state.hintCount <= 0 || !state.gameActive) return;
+            EconomySystem.useItem('hint');
             SFX.hint();
             state.hintCount--;
             document.getElementById('hintCount').textContent = state.hintCount;
@@ -13769,6 +14137,7 @@
 
         function useTimeBonus() {
             if (state.timeCount <= 0 || !state.gameActive) return;
+            EconomySystem.useItem('time');
             SFX.timeBonus();
             state.timeCount--;
             document.getElementById('timeCount').textContent = state.timeCount;
@@ -13779,6 +14148,7 @@
 
         function useShuffle() {
             if (state.shuffleCount <= 0 || !state.gameActive) return;
+            EconomySystem.useItem('shuffle');
             SFX.shuffle();
             state.shuffleCount--;
             document.getElementById('shuffleCount').textContent = state.shuffleCount;
@@ -13830,11 +14200,27 @@
             if (completed) {
                 state.gameScore += state.timeLeft * 2;
             }
-            state.lastTotalScoreBeforeRound = state.totalScore;
-            state.totalScore += state.gameScore;
+            state.lastTotalScoreBeforeRound = EconomySystem.data.totalScore;
+            state.totalScore = EconomySystem.data.totalScore + state.gameScore;
+
+            // Write to economy
+            const prevLevel = EconomySystem.getLevel();
+            EconomySystem.addScore(state.gameScore);
+            const coinReward = Math.max(0, Math.round(state.gameScore / 20));
+            const starCount = getResultStarCount(completed, state.correct + state.wrong > 0 ? Math.round((state.correct / (state.correct + state.wrong)) * 100) : 0, isTodayTaskComplete());
+            const gemReward = starCount >= 3 ? 1 : 0;
+            EconomySystem.addCoins(coinReward);
+            if (gemReward > 0) EconomySystem.addGems(gemReward);
+            state.totalScore = EconomySystem.data.totalScore;
+
+            // Check level up
+            const newLevel = EconomySystem.getLevel();
+            if (newLevel.lv > prevLevel.lv) {
+                setTimeout(() => showComboReward(`🎉 升级! Lv.${newLevel.lv} ${newLevel.title}`), 600);
+            }
 
             // Update header
-            document.getElementById('headerScore').textContent = formatScoreNumber(state.totalScore);
+            updateEconomyUI();
 
             // Show results
             showResults(completed);
@@ -13897,8 +14283,8 @@
             for (let i = 0; i < starCount; i++) {
                 setTimeout(() => SFX.star(i), 160 + i * 150);
             }
-            document.getElementById('rewardCoin').textContent = `x${coinReward}`;
-            document.getElementById('rewardGem').textContent = `x${gemReward}`;
+            document.getElementById('rewardCoin').textContent = `+${coinReward} (余额:${EconomySystem.data.coins})`;
+            document.getElementById('rewardGem').textContent = gemReward > 0 ? `+${gemReward} (余额:${EconomySystem.data.gems})` : `x0`;
 
             if (resultScreen) {
                 resultScreen.classList.remove('settlement-animate');
@@ -14012,10 +14398,116 @@
             state.roundResults = [];
             state.roundFinalized = false;
             document.getElementById('headerLevel').textContent = '0/0';
-            document.getElementById('headerScore').textContent = '0';
+            updateEconomyUI();
             updateEstimate();
             showScreen('startScreen');
         }
+
+        // ===== Economy UI Functions =====
+        function updateEconomyUI() {
+            const eco = EconomySystem.data;
+            if (!eco) return;
+            const lv = EconomySystem.getLevel();
+            const next = EconomySystem.getNextLevel();
+            // Header
+            const lvBadge = document.getElementById('headerLvBadge');
+            if (lvBadge) lvBadge.textContent = `Lv.${lv.lv} ${lv.title}`;
+            const coinsEl = document.getElementById('headerCoins');
+            if (coinsEl) coinsEl.textContent = `🪙 ${eco.coins}`;
+            const gemsEl = document.getElementById('headerGems');
+            if (gemsEl) gemsEl.textContent = `💎 ${eco.gems}`;
+            // Start screen level card
+            const lvTitle = document.getElementById('startLvTitle');
+            if (lvTitle) lvTitle.textContent = `Lv.${lv.lv} ${lv.title}`;
+            const lvProg = document.getElementById('startLvProgress');
+            const lvBar = document.getElementById('startLvBar');
+            if (next) {
+                const range = next.score - lv.score;
+                const progress = eco.totalScore - lv.score;
+                const pct = Math.min(100, Math.round((progress / range) * 100));
+                if (lvProg) lvProg.textContent = `${eco.totalScore} / ${next.score} 分`;
+                if (lvBar) lvBar.style.width = pct + '%';
+            } else {
+                if (lvProg) lvProg.textContent = `${eco.totalScore} 分 (满级)`;
+                if (lvBar) lvBar.style.width = '100%';
+            }
+        }
+
+        function openShop() {
+            SFX.click();
+            renderShop();
+            document.getElementById('shopModal').classList.add('open');
+        }
+
+        function closeShop() {
+            SFX.click();
+            document.getElementById('shopModal').classList.remove('open');
+        }
+
+        function renderShop() {
+            const container = document.getElementById('shopItems');
+            if (!container) return;
+            const coinDisplay = document.getElementById('shopCoinDisplay');
+            if (coinDisplay) coinDisplay.textContent = EconomySystem.data.coins;
+            container.innerHTML = Object.entries(SHOP_ITEMS).map(([key, item]) => {
+                const stock = EconomySystem.getItemCount(key);
+                const canBuy = EconomySystem.data.coins >= item.price;
+                return `<div class="shop-item">
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-stock">库存: ${stock} | ${item.price} 🪙/个</div>
+                    </div>
+                    <button class="buy-btn" onclick="buyShopItem('${key}')" ${canBuy ? '' : 'disabled'}>购买</button>
+                </div>`;
+            }).join('');
+        }
+
+        function buyShopItem(key) {
+            if (EconomySystem.buyItem(key)) {
+                SFX.correct();
+                renderShop();
+                updateEconomyUI();
+            } else {
+                SFX.wrong();
+            }
+        }
+
+        function checkDailyStreak() {
+            const result = EconomySystem.checkStreak();
+            if (!result.isNew) return;
+            const reward = EconomySystem.getStreakReward(result.streak);
+            // Show streak popup
+            const daysEl = document.getElementById('streakDays');
+            if (daysEl) daysEl.textContent = result.streak;
+            const rewardsEl = document.getElementById('streakRewards');
+            if (rewardsEl) {
+                let html = `<div class="reward-chip coin">+${reward.coins} 🪙</div>`;
+                if (reward.gems > 0) html += `<div class="reward-chip gem">+${reward.gems} 💎</div>`;
+                rewardsEl.innerHTML = html;
+            }
+            // Store pending reward
+            window._pendingStreakReward = reward;
+            setTimeout(() => {
+                document.getElementById('streakModal').classList.add('open');
+            }, 500);
+        }
+
+        function claimStreakReward() {
+            SFX.correct();
+            const reward = window._pendingStreakReward;
+            if (reward) {
+                EconomySystem.addCoins(reward.coins);
+                if (reward.gems > 0) EconomySystem.addGems(reward.gems);
+                window._pendingStreakReward = null;
+            }
+            document.getElementById('streakModal').classList.remove('open');
+            updateEconomyUI();
+        }
+
+        // Initialize economy UI on page load
+        updateEconomyUI();
+        checkDailyStreak();
     </script>
 </body>
 </html>

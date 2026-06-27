@@ -12388,7 +12388,9 @@
             if (!AudioCtx) return silentAudioCtx;
             try {
                 if (!audioCtx) audioCtx = new AudioCtx();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume().catch(() => {});
+                }
                 return audioCtx;
             } catch (e) {
                 return silentAudioCtx;
@@ -12595,14 +12597,40 @@
             notes.forEach((freq, i) => playTone(freq, duration, type, volume, i * step));
         }
 
+        let audioUnlocked = false;
         function unlockAudio() {
-            const ctx = getAudioCtx();
-            if (ctx === silentAudioCtx) return;
-            playTone(660, 0.035, 'sine', 0.025);
+            if (audioUnlocked) return;
+            try {
+                if (!audioCtx && AudioCtx) audioCtx = new AudioCtx();
+                if (!audioCtx) return;
+                const resumePromise = audioCtx.resume();
+                if (resumePromise && resumePromise.then) {
+                    resumePromise.then(() => {
+                        if (audioCtx.state === 'running') {
+                            audioUnlocked = true;
+                            playTone(660, 0.035, 'sine', 0.025);
+                            removeUnlockListeners();
+                        }
+                    }).catch(() => {});
+                } else if (audioCtx.state === 'running') {
+                    audioUnlocked = true;
+                    playTone(660, 0.035, 'sine', 0.025);
+                    removeUnlockListeners();
+                }
+            } catch (e) {}
         }
-
-        document.addEventListener('pointerdown', unlockAudio, { once: true });
-        document.addEventListener('keydown', unlockAudio, { once: true });
+        function removeUnlockListeners() {
+            document.removeEventListener('pointerdown', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('touchend', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('keydown', unlockAudio);
+        }
+        document.addEventListener('pointerdown', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio, { passive: true });
+        document.addEventListener('touchend', unlockAudio, { passive: true });
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('keydown', unlockAudio);
 
         Object.assign(SFX, {
             taskStart() { playSequence([392, 523, 659], 0.07, 'triangle', 0.12, 0.14); },

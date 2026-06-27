@@ -14056,28 +14056,18 @@
                 state.scoreMultiplier = 2;
                 showComboReward('🔥 分数翻倍!');
             } else if (combo >= 6 && remainingPairs.length > 0) {
-                // Auto-eliminate a pair
-                const pair = remainingPairs[Math.floor(Math.random() * remainingPairs.length)];
-                showComboReward('⚡ 自动消除!');
+                // Strong hint: highlight ALL remaining pairs for 2.5s
+                showComboReward('🌟 全部揭示!');
+                remainingPairs.forEach(pair => {
+                    pair.enTile.classList.add('hint');
+                    pair.cnTile.classList.add('hint');
+                });
                 setTimeout(() => {
-                    pair.enTile.classList.add('correct');
-                    pair.cnTile.classList.add('correct');
-                    spawnParticles(pair.enTile, parseInt(pair.wi));
-                    spawnParticles(pair.cnTile, parseInt(pair.wi));
-                    const wi = parseInt(pair.wi);
-                    recordMatchResult(wi, 'correct');
-                    state.correct++;
-                    const pts = 10 * (state.scoreMultiplier || 1);
-                    state.gameScore += pts;
-                    document.getElementById('gameScore').textContent = state.gameScore;
-                    SFX.combo(combo);
-                    setTimeout(() => {
-                        pair.enTile.classList.add('eliminated');
-                        pair.cnTile.classList.add('eliminated');
-                        cascadeTiles(pair.enTile, pair.cnTile);
-                        checkGameComplete();
-                    }, 350);
-                }, 400);
+                    remainingPairs.forEach(pair => {
+                        pair.enTile.classList.remove('hint');
+                        pair.cnTile.classList.remove('hint');
+                    });
+                }, 2500);
             }
         }
 

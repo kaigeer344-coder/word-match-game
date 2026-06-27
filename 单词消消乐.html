@@ -1563,6 +1563,31 @@
             background: #f7f7f7 !important;
             border-color: var(--border) !important;
         }
+        /* Word familiarity color coding for English tiles */
+        .tile.english.word-new {
+            background: #fff0f0 !important;
+            border-color: #ff6b6b !important;
+            color: #c0392b !important;
+            box-shadow: 0 4px 0 #e8a0a0;
+        }
+        .tile.english.word-strange {
+            background: #fff5ee !important;
+            border-color: #ff9f43 !important;
+            color: #d35400 !important;
+            box-shadow: 0 4px 0 #e8c4a0;
+        }
+        .tile.english.word-fuzzy {
+            background: #fffaed !important;
+            border-color: #feca57 !important;
+            color: #b7950b !important;
+            box-shadow: 0 4px 0 #e8dca0;
+        }
+        .tile.english.word-mastered {
+            background: #f0fff4 !important;
+            border-color: #58cc02 !important;
+            color: #27ae60 !important;
+            box-shadow: 0 4px 0 #a0e8a8;
+        }
         .tile:hover {
             transform: translateY(-2px);
             border-color: var(--secondary) !important;
@@ -13196,14 +13221,22 @@
             // Create tiles: English words + Chinese meanings
             let tiles = [];
             words.forEach((w, i) => {
-                tiles.push({ id: `en-${i}`, text: w.en, type: 'english', wordIndex: i, wordId: w.wordId });
-                tiles.push({ id: `cn-${i}`, text: w.cn, type: 'chinese', wordIndex: i, wordId: w.wordId });
+                const mem = w.memoryData || {};
+                const fam = mem.familiarity || 0;
+                const status = mem.status || 'new';
+                let wordClass = '';
+                if (status === 'lapsed' || fam === 0) wordClass = ' word-new';
+                else if (fam === 1) wordClass = ' word-strange';
+                else if (fam === 2) wordClass = ' word-fuzzy';
+                else if (fam >= 4) wordClass = ' word-mastered';
+                tiles.push({ id: `en-${i}`, text: w.en, type: 'english', wordIndex: i, wordId: w.wordId, wordClass });
+                tiles.push({ id: `cn-${i}`, text: w.cn, type: 'chinese', wordIndex: i, wordId: w.wordId, wordClass: '' });
             });
 
             tiles = shuffle(tiles);
 
             board.innerHTML = tiles.map(tile => `
-                <div class="tile ${tile.type}" 
+                <div class="tile ${tile.type}${tile.wordClass}" 
                      data-id="${tile.id}" 
                      data-word-id="${tile.wordId}"
                      data-word-index="${tile.wordIndex}"

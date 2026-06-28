@@ -2440,6 +2440,17 @@
                 </div>
             </div>
 
+            <!-- Shuffle Toggle -->
+            <div class="word-count-section" style="margin-bottom:16px;padding:12px 16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span class="section-label" style="margin:0">单词顺序</span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="filter-tab active" id="orderSeqBtn" onclick="setWordOrder('sequential')" style="font-size:11px;padding:4px 12px;">顺序</button>
+                        <button class="filter-tab" id="orderRandBtn" onclick="setWordOrder('random')" style="font-size:11px;padding:4px 12px;">🔀 乱序</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="economy-bar" id="economyBar">
                 <div class="level-card">
                     <div class="lv-title" id="startLvTitle">Lv.1 新手上路</div>
@@ -12777,6 +12788,7 @@
             wordEncounters: {},
             gameActive: false,
             wordsPerRound: 10,
+            wordOrder: 'sequential',
             dailyRounds: 3,
             todayQueue: [],
             completedToday: new Set(),
@@ -12793,6 +12805,151 @@
             totalScoreAnimationFrame: null,
             roundFinalized: false
         };
+
+        // ===== Extra Meanings Map (multiple definitions for common words) =====
+        const extraMeanings = {
+            'abandon': '放弃，抛弃', 'ability': '能力，才干', 'able': '能够的，有能力的',
+            'about': '关于，大约', 'above': '在…上方，超过', 'abroad': '在国外，到国外',
+            'absence': '缺席，缺乏', 'absent': '缺席的，不在场的', 'absolute': '绝对的，完全的',
+            'absorb': '吸收，吸引', 'abstract': '抽象的，摘要', 'abuse': '滥用，虐待',
+            'academic': '学术的，学院的', 'accept': '接受，承认', 'access': '通道，访问，接近',
+            'accident': '事故，意外', 'account': '账户，描述，理由', 'accuse': '控告，指责',
+            'achieve': '达到，实现', 'act': '行动，表演，法案', 'action': '行动，行为，作用',
+            'active': '积极的，活跃的', 'activity': '活动，行动', 'actual': '实际的，真实的',
+            'adapt': '适应，改编', 'add': '添加，增加', 'address': '地址，演说，处理',
+            'adjust': '调整，适应', 'administration': '管理，行政', 'admit': '承认，允许进入',
+            'adopt': '采用，收养', 'advance': '前进，进步，提前', 'advantage': '优势，有利条件',
+            'adventure': '冒险，奇遇', 'advertise': '做广告，宣传', 'advise': '建议，劝告',
+            'affair': '事务，事件', 'affect': '影响，感动', 'afford': '负担得起，提供',
+            'afraid': '害怕的，担心的', 'agency': '代理机构，机构', 'agent': '代理人，经纪人',
+            'agree': '同意，一致', 'agreement': '协议，一致', 'agriculture': '农业，农学',
+            'aid': '帮助，援助', 'aim': '目标，瞄准', 'alarm': '警报，惊慌',
+            'album': '相册，专辑', 'alcohol': '酒精，酒', 'alike': '相似的，同样地',
+            'alive': '活着的，有活力的', 'allow': '允许，承认', 'alter': '改变，修改',
+            'alternative': '可替代的，选择', 'although': '虽然，尽管', 'altogether': '完全，总共',
+            'amount': '数量，总额', 'amuse': '使娱乐，使发笑', 'analyze': '分析，解析',
+            'ancient': '古代的，古老的', 'announce': '宣布，通知', 'annual': '年度的，每年的',
+            'anxious': '焦急的，渴望的', 'apart': '分开，相距', 'appeal': '呼吁，吸引力',
+            'appear': '出现，似乎', 'appearance': '外貌，出现', 'appetite': '食欲，欲望',
+            'apply': '申请，应用', 'appoint': '任命，指定', 'appreciate': '欣赏，感激',
+            'approach': '接近，方法', 'appropriate': '适当的，拨出', 'approve': '批准，赞成',
+            'argue': '争论，辩论', 'argument': '争论，论点', 'arise': '出现，产生',
+            'arrange': '安排，整理', 'arrest': '逮捕，吸引', 'arrive': '到达，达成',
+            'article': '文章，物品，条款', 'artificial': '人造的，虚伪的', 'aspect': '方面，外观',
+            'assemble': '集合，装配', 'assess': '评估，估价', 'assign': '分配，指定',
+            'assist': '帮助，协助', 'associate': '联合，联想', 'assume': '假设，承担',
+            'assure': '保证，确信', 'atmosphere': '大气，气氛', 'attach': '附上，附属',
+            'attack': '攻击，抨击', 'attempt': '尝试，企图', 'attend': '出席，照顾',
+            'attitude': '态度，看法', 'attract': '吸引，引起', 'authority': '权威，当局',
+            'available': '可用的，有空的', 'average': '平均的，普通的', 'avoid': '避免，防止',
+            'award': '奖品，授予', 'aware': '意识到的，知道的', 'balance': '平衡，天平',
+            'ban': '禁止，禁令', 'bargain': '讨价还价，便宜货', 'barrier': '障碍，屏障',
+            'basis': '基础，根据', 'bear': '承受，生育，熊', 'beat': '打败，跳动',
+            'benefit': '利益，好处，受益', 'blame': '责备，归咎于', 'blank': '空白的，茫然的',
+            'block': '街区，阻塞，块', 'bloom': '开花，繁荣', 'board': '板，委员会，上船',
+            'bond': '联系，债券', 'border': '边界，边缘', 'bother': '打扰，烦恼',
+            'boundary': '边界，分界线', 'brand': '品牌，商标', 'brief': '简短的，摘要',
+            'brilliant': '光辉的，杰出的', 'budget': '预算，安排', 'burden': '负担，重担',
+            'calculate': '计算，估计', 'campaign': '运动，战役', 'capable': '有能力的，能干的',
+            'capture': '捕获，俘获', 'career': '职业，生涯', 'casual': '随意的，偶然的',
+            'category': '种类，类别', 'celebrate': '庆祝，赞美', 'challenge': '挑战，质疑',
+            'champion': '冠军，拥护者', 'character': '性格，角色，字符', 'charge': '收费，控告，充电',
+            'circuit': '电路，巡回', 'circumstance': '环境，情况', 'claim': '声称，要求，索赔',
+            'climate': '气候，风气', 'collapse': '倒塌，崩溃', 'colleague': '同事，同僚',
+            'command': '命令，指挥，掌握', 'comment': '评论，注释', 'commercial': '商业的，广告',
+            'commit': '犯(罪)，承诺', 'communicate': '沟通，传达', 'community': '社区，社会',
+            'companion': '同伴，伙伴', 'compare': '比较，对比', 'compete': '竞争，比赛',
+            'complex': '复杂的，综合体', 'component': '组成部分，部件', 'compose': '组成，作曲',
+            'comprehension': '理解，理解力', 'compromise': '妥协，折中', 'concentrate': '集中，专注',
+            'concept': '概念，观念', 'concern': '关心，涉及，担忧', 'conduct': '行为，指挥，进行',
+            'conference': '会议，讨论会', 'confidence': '信心，信任', 'confirm': '确认，证实',
+            'conflict': '冲突，矛盾', 'confuse': '使困惑，混淆', 'conscious': '有意识的，自觉的',
+            'consequence': '结果，后果', 'conservative': '保守的，守旧的', 'consider': '考虑，认为',
+            'consist': '组成，在于', 'constant': '不变的，常数', 'construct': '建造，构建',
+            'consult': '咨询，查阅', 'consume': '消费，消耗', 'contact': '接触，联系',
+            'contain': '包含，容纳', 'content': '内容，满足的', 'context': '上下文，环境',
+            'contract': '合同，收缩', 'contribute': '贡献，捐献', 'controversy': '争议，争论',
+            'convenient': '方便的，便利的', 'conventional': '传统的，常规的', 'convince': '使确信，说服',
+            'cooperate': '合作，协作', 'cope': '应对，处理', 'correspond': '相符，通信',
+            'creative': '创造性的，有创意的', 'critical': '批评的，关键的', 'cultivate': '培养，耕种',
+            'curious': '好奇的，奇特的', 'current': '当前的，水流', 'debate': '辩论，讨论',
+            'decade': '十年', 'decline': '下降，拒绝', 'decorate': '装饰，装修',
+            'decrease': '减少，降低', 'definite': '明确的，肯定的', 'delay': '延迟，耽搁',
+            'deliver': '递送，发表', 'demand': '要求，需求', 'depart': '离开，出发',
+            'deposit': '存款，沉积物，放下', 'depress': '使沮丧，降低', 'derive': '源于，取得',
+            'deserve': '值得，应得', 'desperate': '拼命的，绝望的', 'despite': '尽管，不管',
+            'destruction': '破坏，毁灭', 'detect': '侦查，发现', 'determine': '决定，确定',
+            'device': '设备，装置', 'devote': '奉献，致力于', 'dimension': '尺寸，维度',
+            'discipline': '纪律，学科', 'discount': '折扣，打折', 'distinguish': '区分，辨别',
+            'distribute': '分配，分发', 'diverse': '多样的，不同的', 'domestic': '国内的，家庭的',
+            'dominate': '支配，占优势', 'dramatic': '戏剧性的，引人注目的', 'duration': '持续时间，期间',
+            'dynamic': '动态的，有活力的', 'economy': '经济，节约', 'efficient': '高效的，有效率的',
+            'elaborate': '精心制作的，详尽的', 'eliminate': '消除，淘汰', 'emerge': '出现，浮现',
+            'emotion': '情感，情绪', 'emphasis': '强调，重点', 'encounter': '遭遇，邂逅',
+            'enormous': '巨大的，庞大的', 'ensure': '确保，保证', 'enterprise': '企业，事业',
+            'environment': '环境，周围', 'establish': '建立，确立', 'evaluate': '评估，评价',
+            'evidence': '证据，迹象', 'evolve': '进化，发展', 'exchange': '交换，兑换',
+            'exclude': '排除，不包括', 'executive': '执行的，主管', 'exhibit': '展览，显示',
+            'expand': '扩大，膨胀', 'exploit': '开发，利用', 'expose': '暴露，揭露',
+            'extend': '延伸，扩展', 'external': '外部的，外面的', 'extraordinary': '非凡的，特别的',
+            'facility': '设施，便利', 'factor': '因素，因子', 'failure': '失败，故障',
+            'feature': '特征，特色', 'finance': '财政，金融', 'flexible': '灵活的，柔韧的',
+            'focus': '焦点，集中', 'forbid': '禁止，不许', 'formal': '正式的，正规的',
+            'formula': '公式，方案', 'fortune': '财富，运气', 'foundation': '基础，基金会',
+            'fundamental': '基本的，根本的', 'generate': '产生，发电', 'genuine': '真正的，真诚的',
+            'global': '全球的，整体的', 'guarantee': '保证，担保', 'guilty': '有罪的，内疚的',
+            'identical': '相同的，同一的', 'identify': '识别，认同', 'ignore': '忽视，不理睬',
+            'illustrate': '说明，阐明', 'impact': '影响，冲击', 'implement': '实施，工具',
+            'implication': '含义，暗示', 'impose': '强加，征收', 'incident': '事件，事变',
+            'independent': '独立的，自主的', 'indicate': '表明，指出', 'individual': '个人的，个体',
+            'inevitable': '不可避免的', 'influence': '影响，势力', 'initial': '最初的，首字母',
+            'inquire': '询问，调查', 'insight': '洞察力，见解', 'inspect': '检查，视察',
+            'instance': '例子，实例', 'institute': '学院，建立', 'instruct': '指导，命令',
+            'instrument': '乐器，仪器', 'insurance': '保险，保障', 'integrate': '整合，融合',
+            'intellectual': '智力的，知识分子', 'intense': '强烈的，紧张的', 'interact': '互动，相互作用',
+            'interpret': '解释，翻译', 'interval': '间隔，间距', 'investigate': '调查，研究',
+            'involve': '涉及，包含', 'isolate': '隔离，孤立', 'issue': '问题，发行',
+            'justify': '证明…正当，辩护', 'launch': '发射，发起', 'legitimate': '合法的，正当的',
+            'maintain': '维持，保养', 'manufacture': '制造，生产', 'measure': '测量，措施',
+            'minor': '较小的，未成年人', 'modify': '修改，调整', 'monitor': '监控，监视器',
+            'negotiate': '谈判，协商', 'notion': '概念，想法', 'obtain': '获得，得到',
+            'obvious': '明显的，显然的', 'occasion': '场合，时机', 'operate': '操作，运营',
+            'opportunity': '机会，时机', 'oppose': '反对，对抗', 'option': '选择，选项',
+            'origin': '起源，来源', 'outcome': '结果，成果', 'overcome': '克服，战胜',
+            'parallel': '平行的，类似的', 'participate': '参加，参与', 'perceive': '感知，察觉',
+            'permanent': '永久的，固定的', 'perspective': '视角，观点', 'phenomenon': '现象，奇迹',
+            'potential': '潜在的，可能性', 'precisely': '精确地，恰好', 'preserve': '保存，保护',
+            'previous': '以前的，先前的', 'primarily': '主要地，首先', 'principle': '原则，原理',
+            'priority': '优先权，重点', 'privilege': '特权，优惠', 'procedure': '程序，步骤',
+            'process': '过程，处理', 'promote': '促进，晋升', 'proportion': '比例，部分',
+            'prospect': '前景，可能性', 'protest': '抗议，反对', 'provision': '供应，条款',
+            'pursue': '追求，追赶', 'radical': '根本的，激进的', 'random': '随机的，任意的',
+            'recognition': '认可，识别', 'recommend': '推荐，建议', 'reform': '改革，改良',
+            'region': '地区，区域', 'register': '登记，注册', 'regulate': '调节，管理',
+            'reject': '拒绝，驳回', 'relevant': '相关的，切题的', 'reluctant': '不情愿的，勉强的',
+            'remark': '评论，注意', 'resolve': '解决，决心', 'resource': '资源，财力',
+            'respond': '回答，响应', 'restore': '恢复，修复', 'restrict': '限制，约束',
+            'retain': '保留，保持', 'reveal': '揭示，展现', 'revenue': '收入，税收',
+            'sacrifice': '牺牲，献祭', 'schedule': '时间表，安排', 'secure': '安全的，获得',
+            'significance': '重要性，意义', 'sufficient': '足够的，充分的', 'survey': '调查，测量',
+            'suspend': '暂停，悬挂', 'sustain': '维持，支撑', 'transfer': '转移，转让',
+            'transform': '转变，改造', 'trigger': '触发，引起', 'ultimate': '最终的，根本的',
+            'unique': '独特的，唯一的', 'vital': '至关重要的，生命的'
+        };
+
+        function getDisplayMeanings(word) {
+            const primary = word.cn || '';
+            const extra = extraMeanings[word.en];
+            if (!extra) return primary;
+            if (primary === extra) return primary;
+            return extra;
+        }
+
+        function getPrimaryMeaning(word) {
+            const all = getDisplayMeanings(word);
+            const parts = all.split(/[，,、]/);
+            return parts[0].trim();
+        }
 
         // ===== Spaced Repetition System (similar to Momo) =====
         const MemorySystem = {
@@ -13371,6 +13528,13 @@
             updateEstimate();
         }
 
+        function setWordOrder(order) {
+            SFX.click();
+            state.wordOrder = order;
+            document.getElementById('orderSeqBtn').classList.toggle('active', order === 'sequential');
+            document.getElementById('orderRandBtn').classList.toggle('active', order === 'random');
+        }
+
         // ===== Daily Queue and Round Memory =====
         function calculateNewWordQuota(stats) {
             const dailyTarget = state.wordsPerRound * state.dailyRounds;
@@ -13722,6 +13886,7 @@
                 return;
             }
             state.currentWords = selectRoundWordsFromQueue(state.wordsPerRound);
+            if (state.wordOrder === 'random') state.currentWords = shuffle(state.currentWords);
             if (!state.currentWords.length) {
                 showResults(true);
                 return;
@@ -13759,7 +13924,7 @@
             SFX.learningCard();
             document.getElementById('cardWord').textContent = word.en;
             document.getElementById('cardPhonetic').textContent = word.phonetic;
-            document.getElementById('cardMeaning').textContent = word.cn;
+            document.getElementById('cardMeaning').textContent = getDisplayMeanings(word);
             document.getElementById('flashcard').classList.remove('flipped');
             
             // 显示熟悉度指示
@@ -13812,6 +13977,7 @@
             if (!state.currentWords.length) {
                 buildTodayQueue(state.level);
                 state.currentWords = selectRoundWordsFromQueue(state.wordsPerRound);
+            if (state.wordOrder === 'random') state.currentWords = shuffle(state.currentWords);
             }
             initRoundPerformance();
             state.roundStartedAt = Date.now();
@@ -13871,7 +14037,7 @@
                 else if (fam === 2) wordClass = ' word-fuzzy';
                 else if (fam >= 4) wordClass = ' word-mastered';
                 tiles.push({ id: `en-${i}`, text: w.en, type: 'english', wordIndex: i, wordId: w.wordId, wordClass });
-                tiles.push({ id: `cn-${i}`, text: w.cn, type: 'chinese', wordIndex: i, wordId: w.wordId, wordClass: '' });
+                tiles.push({ id: `cn-${i}`, text: getPrimaryMeaning(w), type: 'chinese', wordIndex: i, wordId: w.wordId, wordClass: '' });
             });
 
             tiles = shuffle(tiles);
@@ -14509,7 +14675,7 @@
                 return `<div class="word-item">
                     <span class="speak-icon" onclick="pronounceWord('${w.en.replace(/'/g, "\\'")}')">🔊</span>
                     <span class="en">${w.en}</span>
-                    <span class="cn">${w.cn}</span>
+                    <span class="cn">${getDisplayMeanings(w)}</span>
                     ${formatResultStatus(result)}
                 </div>`;
             }).join('');
@@ -14819,7 +14985,7 @@
                         <div class="wb-main">
                             <div class="wb-en">${w.en}</div>
                             <div class="wb-phonetic">${w.phonetic || ''}</div>
-                            <div class="wb-cn">${w.cn}</div>
+                            <div class="wb-cn">${getDisplayMeanings(w)}</div>
                             ${detailHtml}
                         </div>
                         <div class="wb-meta">

@@ -14576,24 +14576,31 @@
             state.shuffleCount--;
             document.getElementById('shuffleCount').textContent = state.shuffleCount;
 
-            // Re-render non-eliminated tiles in shuffled order
+            // 通过重排真实 DOM 节点来重排，保留事件和动画状态
             const board = document.getElementById('gameBoard');
-            const tiles = [...board.querySelectorAll('.tile')];
+            const tiles = Array.from(board.children);
             const nonEliminated = tiles.filter(t => !t.classList.contains('eliminated'));
             const eliminated = tiles.filter(t => t.classList.contains('eliminated'));
+            const shuffled = shuffle(nonEliminated);
 
-            const shuffled = shuffle(nonEliminated.map(t => t.outerHTML));
-            let si = 0;
-            board.innerHTML = tiles.map(t => {
-                if (t.classList.contains('eliminated')) {
-                    return t.outerHTML;
-                } else {
-                    return shuffled[si++];
-                }
-            }).join('');
+            // 保持已消除方块在原位，未消除方块打乱后填入剩余位置
+            const newOrder = new Array(tiles.length);
+            eliminated.forEach(t => {
+                const idx = tiles.indexOf(t);
+                if (idx >= 0) newOrder[idx] = t;
+            });
+            let s = 0;
+            for (let i = 0; i < newOrder.length; i++) {
+                if (!newOrder[i]) newOrder[i] = shuffled[s++];
+            }
 
-            // Clear selection
-            state.selectedTile = null;
+            // 清除选中状态
+            if (state.selectedTile) {
+                state.selectedTile.classList.remove('selected');
+                state.selectedTile = null;
+            }
+
+            newOrder.forEach(t => board.appendChild(t));
         }
 
         // Game Complete Check

@@ -1630,6 +1630,12 @@
             border-color: var(--accent) !important;
             box-shadow: 0 0 0 4px rgba(255, 200, 0, 0.22), 0 4px 0 #d6a900;
         }
+        .tile.eliminated {
+            opacity: 0;
+            transform: scale(0.6);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
 
         /* === Particle burst effect === */
         .particle {
@@ -14201,15 +14207,14 @@
             // Float score
             showFloatScore(tile2, `+${points}`);
 
-            // Eliminate after animation + cascade
+            // Eliminate after animation
             setTimeout(() => {
                 tile1.classList.add('eliminated');
                 tile2.classList.add('eliminated');
-                cascadeTiles(tile1, tile2);
                 setTimeout(() => {
                     checkGameComplete();
                     highlightNextPair();
-                }, 350);
+                }, 250);
             }, 400);
 
             state.selectedTile = null;

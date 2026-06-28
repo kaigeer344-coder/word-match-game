@@ -1217,7 +1217,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .start-screen { padding: 34px 20px 30px; }
+        .start-screen { padding: 12px 20px 24px; }
 
         .logo {
             width: 86px;
@@ -1262,7 +1262,7 @@
         .level-selector {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 14px;
-            margin: 28px 0 22px;
+            margin: 18px 0 22px;
         }
 
         .level-btn, .word-count-section, .flashcard, .score-showcase, .result-stat, .words-review, .reward-pill {
@@ -2042,12 +2042,137 @@
         .shop-btn:hover { transform: translateY(-2px); background: #fffaed; }
         .shop-btn:active { transform: translateY(2px); box-shadow: none; }
 
+        /* Header profile/settings button */
+        .header-profile-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 20px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform 140ms ease, background 140ms ease;
+            flex-shrink: 0;
+        }
+        .header-profile-btn:hover { background: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
+        .header-profile-btn:active { transform: translateY(2px); }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 2px solid var(--border);
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 8px 0 12px;
+            z-index: 50;
+        }
+        .bottom-nav.visible { display: grid; }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 0;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color 160ms ease, transform 140ms ease;
+            user-select: none;
+        }
+        .bottom-nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .bottom-nav-item.active {
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .bottom-nav-item:active { transform: translateY(1px); }
+
+        /* Settings / Profile screen */
+        .settings-screen {
+            text-align: center;
+        }
+        .settings-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #7dd43a);
+            color: #ffffff;
+            font-size: 40px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px;
+            border: 4px solid #ffffff;
+            box-shadow: var(--shadow-neutral);
+        }
+        .settings-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        .settings-id {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+        .settings-currency {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .settings-currency .currency-pill {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 1000;
+            color: var(--dark);
+            box-shadow: var(--shadow-neutral);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .settings-currency .currency-pill.coins { border-color: var(--accent); color: #d4a017; }
+        .settings-currency .currency-pill.gems { border-color: #1cb0f6; color: #1688c5; }
+        .settings-actions {
+            display: grid;
+            gap: 12px;
+            max-width: 360px;
+            margin: 0 auto 16px;
+        }
+        .settings-actions .shop-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .settings-hint {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
         /* === Shop Modal === */
         .modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.45);
-            z-index: 500;
+            z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -2363,10 +2488,19 @@
                 padding: 6px 7px;
                 font-size: 10px;
             }
-            .economy-badge.level { font-size: 10px; padding: 3px 7px; }
-            .economy-badge { padding: 3px 7px; font-size: 11px; }
             .stat-value {
                 font-size: 15px;
+            }
+            .header-profile-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .bottom-nav-item {
+                font-size: 10px;
+            }
+            .bottom-nav-item .nav-icon {
+                font-size: 20px;
             }
             .tile {
                 font-size: 12px !important;
@@ -2402,11 +2536,7 @@
                     <div class="stat-value" id="headerLevel">0/0</div>
                     <div>今日进度</div>
                 </div>
-                <div class="header-economy">
-                    <div class="economy-badge level" id="headerLvBadge">Lv.1 新手上路</div>
-                    <div class="economy-badge coins" id="headerCoins">🪙 0</div>
-                    <div class="economy-badge gems" id="headerGems">💎 0</div>
-                </div>
+                <button class="header-profile-btn" onclick="switchTab('settings')" title="个人中心/设置">👤</button>
             </div>
         </div>
 
@@ -2455,20 +2585,6 @@
                     词库共 <span id="totalWordsCount">100</span> 词，剩余词数约需 <strong id="daysEstimate">4</strong> 天学完
                     <div id="progressStats"></div>
                 </div>
-            </div>
-
-            <div class="economy-bar" id="economyBar">
-                <div class="level-card">
-                    <div class="lv-title" id="startLvTitle">Lv.1 新手上路</div>
-                    <div class="lv-progress" id="startLvProgress">0 / 500 分</div>
-                    <div class="level-bar-bg"><div class="level-bar-fill" id="startLvBar" style="width:0%"></div></div>
-                </div>
-            </div>
-
-            <div class="economy-bar" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="openShop()">🛒 商店</button>
-                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="showStats()">📊 统计</button>
-                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="showWordBook()">📚 词书</button>
             </div>
 
             <button class="btn-primary" ontouchstart="unlockAudio()" onclick="startTodayTask()">开始今日任务</button>
@@ -2605,6 +2721,49 @@
             <div class="wb-list" id="wbList"></div>
             <div class="wb-footer" id="wbFooter"></div>
         </div>
+
+        <!-- Settings / Profile Screen -->
+        <div class="screen settings-screen" id="settingsScreen">
+            <div class="settings-avatar">👤</div>
+            <div class="settings-name" id="settingsName">Lv.1 新手上路</div>
+            <div class="settings-id" id="settingsId">累计得分: 0</div>
+
+            <div class="level-card" style="margin:0 auto 20px;max-width:260px;">
+                <div class="lv-progress" id="settingsLvProgress">0 / 500 分</div>
+                <div class="level-bar-bg"><div class="level-bar-fill" id="settingsLvBar" style="width:0%"></div></div>
+            </div>
+
+            <div class="settings-currency">
+                <div class="currency-pill coins" id="settingsCoins">🪙 0</div>
+                <div class="currency-pill gems" id="settingsGems">💎 0</div>
+            </div>
+
+            <div class="settings-actions">
+                <button class="shop-btn" onclick="openShop()">🛒 打开商店</button>
+                <button class="shop-btn" style="border-color:#ff4b4b;color:#ff4b4b;" onclick="if(confirm('确定要清除所有学习进度吗？此操作不可恢复。')){ localStorage.clear(); location.reload(); }">🗑️ 清除学习数据</button>
+            </div>
+            <div class="settings-hint">单词消消乐 · 让背单词像玩游戏一样简单</div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav visible" id="bottomNav">
+            <div class="bottom-nav-item active" data-tab="home" onclick="switchTab('home')">
+                <span class="nav-icon">🏠</span>
+                <span>首页</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="wordbook" onclick="switchTab('wordbook')">
+                <span class="nav-icon">📚</span>
+                <span>词书</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="stats" onclick="switchTab('stats')">
+                <span class="nav-icon">📊</span>
+                <span>统计</span>
+            </div>
+            <div class="bottom-nav-item" data-tab="settings" onclick="switchTab('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span>设置</span>
+            </div>
+        </nav>
     </div>
 
     <!-- Shop Modal -->
@@ -13690,9 +13849,38 @@
             return String(str).replace(/[\\']/g, '\\$&');
         }
 
+        const BOTTOM_NAV_SCREENS = ['startScreen', 'statsScreen', 'wordBookScreen', 'settingsScreen'];
+
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            const nav = document.getElementById('bottomNav');
+            if (nav) {
+                nav.classList.toggle('visible', BOTTOM_NAV_SCREENS.includes(id));
+            }
+        }
+
+        function setBottomNavVisible(visible) {
+            const nav = document.getElementById('bottomNav');
+            if (nav) nav.classList.toggle('visible', visible);
+        }
+
+        function switchTab(tab) {
+            SFX.click();
+            const map = { home: 'startScreen', wordbook: 'wordBookScreen', stats: 'statsScreen', settings: 'settingsScreen' };
+            const id = map[tab];
+            if (!id) return;
+            showScreen(id);
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === tab);
+            });
+            if (tab === 'wordbook') {
+                showWordBook();
+            } else if (tab === 'stats') {
+                showStats();
+            } else if (tab === 'settings') {
+                renderSettings();
+            }
         }
 
         // Level Selection
@@ -15015,26 +15203,33 @@
             updateEconomyUI();
             updateEstimate();
             showScreen('startScreen');
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === 'home');
+            });
         }
 
         // ===== Economy UI Functions =====
         function updateEconomyUI() {
             const eco = EconomySystem.data;
             if (!eco) return;
+            renderSettings();
+        }
+
+        function renderSettings() {
+            const eco = EconomySystem.data;
+            if (!eco) return;
             const lv = EconomySystem.getLevel();
             const next = EconomySystem.getNextLevel();
-            // Header
-            const lvBadge = document.getElementById('headerLvBadge');
-            if (lvBadge) lvBadge.textContent = `Lv.${lv.lv} ${lv.title}`;
-            const coinsEl = document.getElementById('headerCoins');
+            const nameEl = document.getElementById('settingsName');
+            if (nameEl) nameEl.textContent = `Lv.${lv.lv} ${lv.title}`;
+            const idEl = document.getElementById('settingsId');
+            if (idEl) idEl.textContent = `累计得分: ${eco.totalScore || 0}`;
+            const coinsEl = document.getElementById('settingsCoins');
             if (coinsEl) coinsEl.textContent = `🪙 ${eco.coins}`;
-            const gemsEl = document.getElementById('headerGems');
+            const gemsEl = document.getElementById('settingsGems');
             if (gemsEl) gemsEl.textContent = `💎 ${eco.gems}`;
-            // Start screen level card
-            const lvTitle = document.getElementById('startLvTitle');
-            if (lvTitle) lvTitle.textContent = `Lv.${lv.lv} ${lv.title}`;
-            const lvProg = document.getElementById('startLvProgress');
-            const lvBar = document.getElementById('startLvBar');
+            const lvProg = document.getElementById('settingsLvProgress');
+            const lvBar = document.getElementById('settingsLvBar');
             if (next) {
                 const range = next.score - lv.score;
                 const progress = eco.totalScore - lv.score;
@@ -15051,11 +15246,13 @@
             SFX.click();
             renderShop();
             document.getElementById('shopModal').classList.add('open');
+            setBottomNavVisible(false);
         }
 
         function closeShop() {
             SFX.click();
             document.getElementById('shopModal').classList.remove('open');
+            setBottomNavVisible(true);
         }
 
         function renderShop() {
@@ -15114,6 +15311,7 @@
             window._pendingStreakReward = reward;
             setTimeout(() => {
                 document.getElementById('streakModal').classList.add('open');
+                setBottomNavVisible(false);
             }, 500);
         }
 
@@ -15121,6 +15319,7 @@
             SFX.correct();
             window._pendingStreakReward = null;
             document.getElementById('streakModal').classList.remove('open');
+            setBottomNavVisible(true);
         }
 
         // Initialize economy UI on page load (defer to allow first paint)
@@ -15134,12 +15333,16 @@
         // Modal close: click overlay or press Escape
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) overlay.classList.remove('open');
+                if (e.target === overlay) {
+                    overlay.classList.remove('open');
+                    setBottomNavVisible(true);
+                }
             });
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay.open').forEach(overlay => overlay.classList.remove('open'));
+                setBottomNavVisible(true);
             }
         });
 

@@ -14295,7 +14295,8 @@
         }
 
         function showSmartHint(wordIndex, clickedType) {
-            recordMatchResult(wordIndex, 'hint');
+            // 智能提示只做视觉提示，不影响评分
+            // recordMatchResult(wordIndex, 'hint');
             // Highlight the matching tile briefly
             const matchType = clickedType === 'english' ? 'chinese' : 'english';
             const matchTile = document.querySelector(`.tile[data-word-index="${wordIndex}"][data-type="${matchType}"]`);

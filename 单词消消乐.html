@@ -2207,7 +2207,7 @@
         .stats-detail-item .sd-label { font-size: 11px; color: var(--muted); font-weight: 700; }
 
         /* === Word Book Screen === */
-        .wb-screen { padding: 16px; display: flex; flex-direction: column; height: 100vh; max-height: 100vh; }
+        .wb-screen { padding: 16px; height: 100vh; max-height: 100vh; }
         .wb-header {
             display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0;
         }
@@ -14671,8 +14671,7 @@
             const levelNames = { cet4: 'CET-4', cet6: 'CET-6', toefl: 'TOEFL', gre: 'GRE' };
 
             // Navigate
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('statsScreen').classList.add('active');
+            showScreen('statsScreen');
 
             // Overview cards
             const overview = document.getElementById('statsOverview');
@@ -14721,12 +14720,11 @@
         let wbExpandedWord = null;
 
         function showWordBook() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('wordBookScreen').classList.add('active');
+            showScreen('wordBookScreen');
             wbCurrentFilter = 'all';
             wbCurrentSearch = '';
             wbExpandedWord = null;
-            const searchEl = document.getElementById('wbSearch');
+            var searchEl = document.getElementById('wbSearch');
             if (searchEl) searchEl.value = '';
             renderWBFilters();
             renderWBList();

@@ -13502,6 +13502,10 @@
             return a;
         }
 
+        function escapeJs(str) {
+            return String(str).replace(/[\\']/g, '\\$&');
+        }
+
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -15064,7 +15068,9 @@
                             <div>自我评估: <b>${mem.selfRating || '-'}</b> | 游戏结果: <b>${mem.lastGameResult || '-'}</b></div>
                         </div>`;
                     }
-                    return `<div class="wb-item" onclick="toggleWordDetail('${w.wordId}')">
+                    const safeEn = escapeJs(w.en);
+                    const safeWordId = escapeJs(w.wordId);
+                    return `<div class="wb-item" onclick="toggleWordDetail('${safeWordId}')">
                         <span class="wb-dot" style="background:${dotColor}"></span>
                         <div class="wb-main">
                             <div class="wb-en">${w.en}</div>
@@ -15074,8 +15080,8 @@
                         </div>
                         <div class="wb-meta">
                             <span class="wb-reviews">${mem.reviewCount || 0}次</span>
-                            <button class="wb-speak" onclick="event.stopPropagation();pronounceWord('${w.en}')">🔊</button>
-                            <button class="wb-bookmark ${isBookmarked ? 'active' : ''}" onclick="event.stopPropagation();toggleBookmark('${w.wordId}')">${isBookmarked ? '⭐' : '☆'}</button>
+                            <button class="wb-speak" onclick="event.stopPropagation();pronounceWord('${safeEn}')">🔊</button>
+                            <button class="wb-bookmark ${isBookmarked ? 'active' : ''}" onclick="event.stopPropagation();toggleBookmark('${safeWordId}')">${isBookmarked ? '⭐' : '☆'}</button>
                         </div>
                     </div>`;
                 }).join('');

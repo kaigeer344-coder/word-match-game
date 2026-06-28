@@ -1158,6 +1158,7 @@
             border: 2px solid var(--border);
             background: var(--surface);
             box-shadow: 0 8px 0 #d9d9d9, 0 18px 38px rgba(60, 60, 60, 0.08);
+            overflow-y: auto;
         }
 
         .game-header {
@@ -2160,7 +2161,7 @@
         .streak-claim-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--primary-dark); }
 
         /* === Stats Screen === */
-        .stats-screen { padding: 16px; }
+        .stats-screen { padding: 16px; flex: 1; min-height: 0; overflow-y: auto; }
         .stats-back-btn {
             background: none; border: none; font-size: 14px; color: var(--secondary-dark);
             font-weight: 800; cursor: pointer; padding: 8px 0; margin-bottom: 8px;

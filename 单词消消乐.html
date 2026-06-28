@@ -87,7 +87,6 @@
         .screen.active {
             display: block;
         }
-        .screen.wb-screen.active,
         .screen.stats-screen.active {
             display: flex;
             flex-direction: column;
@@ -2062,16 +2061,19 @@
 
         /* Bottom navigation */
         .bottom-nav {
-            position: sticky;
+            position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 520px;
             background: var(--surface);
             border-top: 2px solid var(--border);
             display: none;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             padding: 8px 0 12px;
             z-index: 50;
+            box-sizing: border-box;
         }
         .bottom-nav.visible { display: grid; }
         .bottom-nav-item {
@@ -2096,6 +2098,15 @@
             transform: translateY(-1px);
         }
         .bottom-nav-item:active { transform: translateY(1px); }
+
+        .game-container.has-bottom-nav { padding-bottom: 70px; }
+        .header-profile-btn img,
+        .settings-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
 
         /* Settings / Profile screen */
         .settings-screen {
@@ -2338,17 +2349,6 @@
         .stats-detail-item .sd-value { font-size: 18px; font-weight: 1000; color: var(--secondary-dark); }
         .stats-detail-item .sd-label { font-size: 11px; color: var(--muted); font-weight: 700; }
 
-        /* === Word Book Screen === */
-        .wb-screen { padding: 16px; flex: 1; min-height: 0; }
-        .wb-header {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0;
-        }
-        .wb-search {
-            flex: 1; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--border);
-            font-size: 14px; font-weight: 600; background: var(--surface); outline: none;
-            transition: border-color 0.2s;
-        }
-        .wb-search:focus { border-color: var(--primary); }
         .filter-tabs {
             display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; flex-shrink: 0;
             padding-bottom: 4px;
@@ -2363,45 +2363,6 @@
             color: #fff;
         }
         .filter-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary-dark); }
-        .wb-list {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
-            padding-bottom: 8px; min-height: 0;
-        }
-        .wb-item {
-            display: flex; align-items: center; gap: 10px; padding: 12px 14px;
-            background: var(--surface); border: 2px solid var(--border); border-radius: 14px;
-            cursor: pointer; transition: all 0.15s;
-        }
-        .wb-item:hover { border-color: var(--primary); }
-        .wb-item .wb-dot {
-            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-        }
-        .wb-item .wb-main { flex: 1; min-width: 0; }
-        .wb-item .wb-en { font-size: 15px; font-weight: 900; color: var(--dark); }
-        .wb-item .wb-phonetic { font-size: 11px; color: var(--muted); }
-        .wb-item .wb-cn { font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 2px; }
-        .wb-item .wb-meta {
-            display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-        }
-        .wb-item .wb-reviews { font-size: 11px; color: var(--muted); font-weight: 700; }
-        .wb-item .wb-speak {
-            background: none; border: none; font-size: 16px; cursor: pointer; padding: 2px;
-        }
-        .wb-item .wb-bookmark {
-            background: none; border: none; font-size: 18px; cursor: pointer; padding: 2px;
-            opacity: 0.3; transition: opacity 0.15s;
-        }
-        .wb-item .wb-bookmark.active { opacity: 1; }
-        .wb-detail {
-            margin-top: 8px; padding: 12px; background: #f7f7f7; border-radius: 12px;
-            font-size: 12px; color: var(--dark); line-height: 1.8;
-        }
-        .wb-detail b { color: var(--primary-dark); }
-        .wb-footer {
-            flex-shrink: 0; text-align: center; font-size: 12px; color: var(--muted);
-            font-weight: 700; padding: 8px 0; border-top: 1px solid var(--border); margin-top: 4px;
-        }
-
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { scroll-behavior: auto !important; }
             .screen, .settlement-rays, .sparkle-field span, .combo-display.active, .timer.warning { animation: none !important; }
@@ -2536,7 +2497,7 @@
                     <div class="stat-value" id="headerLevel">0/0</div>
                     <div>今日进度</div>
                 </div>
-                <button class="header-profile-btn" onclick="switchTab('settings')" title="个人中心/设置">👤</button>
+                <button class="header-profile-btn" onclick="switchTab('settings')" title="个人中心/设置"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='ag' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2358cc02'/%3E%3Cstop offset='100%25' stop-color='%2346a302'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23ag)' stroke='%23fff' stroke-width='4'/%3E%3Cellipse cx='35' cy='42' rx='9' ry='11' fill='%23fff'/%3E%3Cellipse cx='65' cy='42' rx='9' ry='11' fill='%23fff'/%3E%3Ccircle cx='35' cy='42' r='5' fill='%233c3c3c'/%3E%3Ccircle cx='65' cy='42' r='5' fill='%233c3c3c'/%3E%3Cpath d='M38 64 Q50 76 62 64' stroke='%23fff' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='22' cy='55' r='5' fill='%23d7ffb8' opacity='0.5'/%3E%3Ccircle cx='78' cy='55' r='5' fill='%23d7ffb8' opacity='0.5'/%3E%3C/svg%3E" alt=""></button>
             </div>
         </div>
 
@@ -2711,20 +2672,9 @@
             <div class="stats-detail" id="statsDetail"></div>
         </div>
 
-        <!-- Word Book Screen -->
-        <div class="screen wb-screen" id="wordBookScreen">
-            <div class="wb-header">
-                <button class="stats-back-btn" onclick="goHome()" style="margin:0">← 返回</button>
-                <input type="text" class="wb-search" id="wbSearch" placeholder="搜索单词或释义..." oninput="searchWordBook(this.value)">
-            </div>
-            <div class="filter-tabs" id="wbFilters"></div>
-            <div class="wb-list" id="wbList"></div>
-            <div class="wb-footer" id="wbFooter"></div>
-        </div>
-
         <!-- Settings / Profile Screen -->
         <div class="screen settings-screen" id="settingsScreen">
-            <div class="settings-avatar">👤</div>
+            <div class="settings-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='ag' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2358cc02'/%3E%3Cstop offset='100%25' stop-color='%2346a302'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23ag)' stroke='%23fff' stroke-width='4'/%3E%3Cellipse cx='35' cy='42' rx='9' ry='11' fill='%23fff'/%3E%3Cellipse cx='65' cy='42' rx='9' ry='11' fill='%23fff'/%3E%3Ccircle cx='35' cy='42' r='5' fill='%233c3c3c'/%3E%3Ccircle cx='65' cy='42' r='5' fill='%233c3c3c'/%3E%3Cpath d='M38 64 Q50 76 62 64' stroke='%23fff' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='22' cy='55' r='5' fill='%23d7ffb8' opacity='0.5'/%3E%3Ccircle cx='78' cy='55' r='5' fill='%23d7ffb8' opacity='0.5'/%3E%3C/svg%3E" alt=""></div>
             <div class="settings-name" id="settingsName">Lv.1 新手上路</div>
             <div class="settings-id" id="settingsId">累计得分: 0</div>
 
@@ -2750,10 +2700,6 @@
             <div class="bottom-nav-item active" data-tab="home" onclick="switchTab('home')">
                 <span class="nav-icon">🏠</span>
                 <span>首页</span>
-            </div>
-            <div class="bottom-nav-item" data-tab="wordbook" onclick="switchTab('wordbook')">
-                <span class="nav-icon">📚</span>
-                <span>词书</span>
             </div>
             <div class="bottom-nav-item" data-tab="stats" onclick="switchTab('stats')">
                 <span class="nav-icon">📊</span>
@@ -13849,34 +13795,31 @@
             return String(str).replace(/[\\']/g, '\\$&');
         }
 
-        const BOTTOM_NAV_SCREENS = ['startScreen', 'statsScreen', 'wordBookScreen', 'settingsScreen'];
+        const BOTTOM_NAV_SCREENS = ['startScreen', 'statsScreen', 'settingsScreen'];
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            const nav = document.getElementById('bottomNav');
-            if (nav) {
-                nav.classList.toggle('visible', BOTTOM_NAV_SCREENS.includes(id));
-            }
+            setBottomNavVisible(BOTTOM_NAV_SCREENS.includes(id));
         }
 
         function setBottomNavVisible(visible) {
             const nav = document.getElementById('bottomNav');
             if (nav) nav.classList.toggle('visible', visible);
+            const container = document.querySelector('.game-container');
+            if (container) container.classList.toggle('has-bottom-nav', visible);
         }
 
         function switchTab(tab) {
             SFX.click();
-            const map = { home: 'startScreen', wordbook: 'wordBookScreen', stats: 'statsScreen', settings: 'settingsScreen' };
+            const map = { home: 'startScreen', stats: 'statsScreen', settings: 'settingsScreen' };
             const id = map[tab];
             if (!id) return;
             showScreen(id);
             document.querySelectorAll('.bottom-nav-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.tab === tab);
             });
-            if (tab === 'wordbook') {
-                showWordBook();
-            } else if (tab === 'stats') {
+            if (tab === 'stats') {
                 showStats();
             } else if (tab === 'settings') {
                 renderSettings();
@@ -15397,151 +15340,6 @@
             `;
         }
 
-        // ===== Word Book Screen =====
-        let wbCurrentFilter = 'all';
-        let wbCurrentSearch = '';
-        let wbExpandedWord = null;
-
-        function showWordBook() {
-            showScreen('wordBookScreen');
-            wbCurrentFilter = 'all';
-            wbCurrentSearch = '';
-            wbExpandedWord = null;
-            var searchEl = document.getElementById('wbSearch');
-            if (searchEl) searchEl.value = '';
-            renderWBFilters();
-            renderWBList();
-        }
-
-        function renderWBFilters() {
-            const filters = [
-                { key: 'all', label: '全部' },
-                { key: 'new', label: '新词' },
-                { key: 'learning', label: '学习中' },
-                { key: 'mastered', label: '已掌握' },
-                { key: 'lapsed', label: '已遗忘' },
-                { key: 'bookmarked', label: '已收藏' }
-            ];
-            document.getElementById('wbFilters').innerHTML = filters.map(f =>
-                `<button class="filter-tab ${wbCurrentFilter === f.key ? 'active' : ''}" onclick="filterWordBook('${f.key}')">${f.label}</button>`
-            ).join('');
-        }
-
-        function filterWordBook(filter) {
-            wbCurrentFilter = filter;
-            renderWBFilters();
-            renderWBList();
-        }
-
-        function searchWordBook(query) {
-            wbCurrentSearch = query.toLowerCase().trim();
-            renderWBList();
-        }
-
-        function getDotColor(mem) {
-            const fam = mem.familiarity || 0;
-            const status = mem.status || 'new';
-            if (status === 'lapsed' || fam === 0) return '#a78bfa';
-            if (fam === 1) return '#ff9f43';
-            if (fam === 2) return '#feca57';
-            if (fam >= 4) return '#58cc02';
-            return '#ccc';
-        }
-
-        function renderWBList() {
-            const level = state.level || 'cet4';
-            const words = MemorySystem.getAllWords(level);
-            let filtered = words.filter(w => {
-                const mem = w.memoryData || {};
-                const fam = mem.familiarity || 0;
-                const status = mem.status || 'new';
-                // Filter
-                if (wbCurrentFilter === 'new' && !(status === 'new' || fam === 0)) return false;
-                if (wbCurrentFilter === 'learning' && !(status !== 'new' && fam > 0 && fam < 4)) return false;
-                if (wbCurrentFilter === 'mastered' && !(fam >= 4)) return false;
-                if (wbCurrentFilter === 'lapsed' && !(status === 'lapsed' || (mem.reviewCount > 0 && fam === 0))) return false;
-                if (wbCurrentFilter === 'bookmarked' && !mem.bookmarked) return false;
-                // Search
-                if (wbCurrentSearch) {
-                    return (w.en || '').toLowerCase().includes(wbCurrentSearch) ||
-                           (w.cn || '').includes(wbCurrentSearch);
-                }
-                return true;
-            });
-
-            const listEl = document.getElementById('wbList');
-            if (filtered.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-weight:700;">无匹配单词</div>';
-            } else {
-                // Limit to first 200 for performance
-                const shown = filtered.slice(0, 200);
-                listEl.innerHTML = shown.map(w => {
-                    const mem = w.memoryData || {};
-                    const dotColor = getDotColor(mem);
-                    const isExpanded = wbExpandedWord === w.wordId;
-                    const isBookmarked = mem.bookmarked;
-                    let detailHtml = '';
-                    if (isExpanded) {
-                        const nextRev = mem.nextReview ? new Date(mem.nextReview).toLocaleDateString('zh-CN') : '-';
-                        const lastRev = mem.lastReview ? new Date(mem.lastReview).toLocaleDateString('zh-CN') : '-';
-                        const firstLearned = mem.firstLearnedAt ? new Date(mem.firstLearnedAt).toLocaleDateString('zh-CN') : '-';
-                        const accuracy = mem.reviewCount > 0 ? Math.round((mem.correctCount / mem.reviewCount) * 100) : 0;
-                        detailHtml = `<div class="wb-detail">
-                            <div>复习次数: <b>${mem.reviewCount || 0}</b> | 正确: <b>${mem.correctCount || 0}</b> | 错误: <b>${mem.wrongCount || 0}</b></div>
-                            <div>正确率: <b>${accuracy}%</b> | 连对: <b>${mem.consecutiveCorrect || 0}</b> | 遗忘: <b>${mem.lapseCount || 0}</b></div>
-                            <div>熟悉度: <b>${mem.familiarity || 0}/5</b> | 记忆强度: <b>${(mem.memoryStrength || 0).toFixed(1)}</b></div>
-                            <div>首次学习: <b>${firstLearned}</b> | 上次复习: <b>${lastRev}</b></div>
-                            <div>下次复习: <b>${nextRev}</b></div>
-                            <div>自我评估: <b>${mem.selfRating || '-'}</b> | 游戏结果: <b>${mem.lastGameResult || '-'}</b></div>
-                        </div>`;
-                    }
-                    const safeEn = escapeJs(w.en);
-                    const safeWordId = escapeJs(w.wordId);
-                    return `<div class="wb-item" onclick="toggleWordDetail('${safeWordId}')">
-                        <span class="wb-dot" style="background:${dotColor}"></span>
-                        <div class="wb-main">
-                            <div class="wb-en">${w.en}</div>
-                            <div class="wb-phonetic">${w.phonetic || ''}</div>
-                            <div class="wb-cn">${getDisplayMeanings(w)}</div>
-                            ${detailHtml}
-                        </div>
-                        <div class="wb-meta">
-                            <span class="wb-reviews">${mem.reviewCount || 0}次</span>
-                            <button class="wb-speak" onclick="event.stopPropagation();pronounceWord('${safeEn}')">🔊</button>
-                            <button class="wb-bookmark ${isBookmarked ? 'active' : ''}" onclick="event.stopPropagation();toggleBookmark('${safeWordId}')">${isBookmarked ? '⭐' : '☆'}</button>
-                        </div>
-                    </div>`;
-                }).join('');
-                if (filtered.length > 200) {
-                    listEl.innerHTML += `<div style="text-align:center;color:var(--muted);padding:8px 0;font-size:12px;font-weight:700;">还有 ${filtered.length - 200} 个词未显示...</div>`;
-                }
-            }
-            document.getElementById('wbFooter').textContent = `${filtered.length} / ${words.length} 词`;
-        }
-
-        function toggleWordDetail(wordId) {
-            wbExpandedWord = wbExpandedWord === wordId ? null : wordId;
-            renderWBList();
-        }
-
-        function toggleBookmark(wordId) {
-            const level = state.level || 'cet4';
-            const parts = wordId.split('_');
-            const index = parts.length >= 2 ? parseInt(parts[1]) : -1;
-            let word = null;
-            if (index >= 0 && wordDB[level] && wordDB[level][index]) {
-                word = wordDB[level][index];
-            } else {
-                // fallback: find by en
-                const en = parts.slice(2).join('_');
-                word = wordDB[level].find(w => w.en === en);
-            }
-            if (!word) return;
-            const mem = MemorySystem.getMemoryForWord(level, word, index >= 0 ? index : wordDB[level].indexOf(word));
-            mem.bookmarked = !mem.bookmarked;
-            MemorySystem.saveWordMemory(wordId, mem);
-            renderWBList();
-        }
     </script>
 </body>
 </html>

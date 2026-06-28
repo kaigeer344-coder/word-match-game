@@ -13655,12 +13655,12 @@
                 const oldPerf = previous[word.wordId] || {};
                 state.roundPerformance[word.wordId] = {
                     wordId: word.wordId,
-                    wrongAttempts: oldPerf.wrongAttempts || 0,
-                    firstTryCorrect: oldPerf.firstTryCorrect || false,
-                    hintUsed: oldPerf.hintUsed || false,
-                    matched: oldPerf.matched || false,
-                    timedOut: oldPerf.timedOut || false,
-                    selfRating: oldPerf.selfRating || state.selfRatings[word.wordId] || word.memoryData.selfRating || null
+                    wrongAttempts: 0,
+                    firstTryCorrect: false,
+                    hintUsed: false,
+                    matched: false,
+                    timedOut: false,
+                    selfRating: state.selfRatings[word.wordId] || word.memoryData.selfRating || oldPerf.selfRating || null
                 };
             });
         }

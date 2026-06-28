@@ -101,24 +101,47 @@
         /* Start Screen */
         .start-screen {
             text-align: center;
-            padding: 40px 24px;
+            padding: 24px 20px;
         }
 
-        .logo {
-            font-size: 64px;
-            margin-bottom: 16px;
+        .start-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .start-brand .logo {
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+            margin: 0;
+            border-radius: 16px;
+        }
+
+        .start-brand .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .start-brand .brand-text {
+            flex: 1;
+            min-width: 0;
         }
 
         .start-screen h2 {
             font-size: 28px;
             color: var(--dark);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .start-screen p {
             color: #636e72;
-            margin-bottom: 32px;
-            line-height: 1.6;
+            margin-bottom: 0;
+            line-height: 1.5;
+            font-size: 13px;
         }
 
         .level-selector {
@@ -1265,6 +1288,43 @@
             color: var(--muted) !important;
             font-size: 15px;
             line-height: 1.55;
+        }
+
+        .start-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .start-brand .logo {
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+            margin: 0;
+            border-radius: 16px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            transform: none;
+        }
+        .start-brand .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .start-brand .brand-text {
+            flex: 1;
+            min-width: 0;
+        }
+        .start-brand h2 {
+            font-size: 24px;
+            margin-bottom: 2px;
+        }
+        .start-brand p {
+            font-size: 13px;
+            margin-bottom: 0;
+            line-height: 1.4;
         }
 
         .level-selector {
@@ -2420,9 +2480,13 @@
 
         <!-- Start Screen -->
         <div class="screen start-screen active" id="startScreen">
-            <div class="logo" aria-hidden="true"><img src="assets/word-match-logo.png" alt=""></div>
-            <h2>单词消消乐</h2>
-            <p>配对英文单词和中文释义<br>在游戏中轻松记住单词</p>
+            <div class="start-brand">
+                <div class="logo"><img src="assets/word-match-logo.png" alt=""></div>
+                <div class="brand-text">
+                    <h2>单词消消乐</h2>
+                    <p>配对英文单词和中文释义，在游戏中轻松记住单词</p>
+                </div>
+            </div>
             
             <div class="level-selector">
                 <div class="level-btn selected" data-level="cet4" ontouchstart="unlockAudio()" onclick="selectLevel(this)">

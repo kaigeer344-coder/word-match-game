@@ -14913,6 +14913,10 @@
                 updateEconomyUI();
                 return;
             }
+            // 奖励直接到账，弹窗仅用于展示，避免未点击领取就刷新导致丢失
+            EconomySystem.addCoins(reward.coins);
+            if (reward.gems > 0) EconomySystem.addGems(reward.gems);
+            updateEconomyUI();
             // Show streak popup
             const daysEl = document.getElementById('streakDays');
             if (daysEl) daysEl.textContent = result.streak;
@@ -14922,7 +14926,6 @@
                 if (reward.gems > 0) html += `<div class="reward-chip gem">+${reward.gems} 💎</div>`;
                 rewardsEl.innerHTML = html;
             }
-            // Store pending reward
             window._pendingStreakReward = reward;
             setTimeout(() => {
                 document.getElementById('streakModal').classList.add('open');
@@ -14931,14 +14934,8 @@
 
         function claimStreakReward() {
             SFX.correct();
-            const reward = window._pendingStreakReward;
-            if (reward) {
-                EconomySystem.addCoins(reward.coins);
-                if (reward.gems > 0) EconomySystem.addGems(reward.gems);
-                window._pendingStreakReward = null;
-            }
+            window._pendingStreakReward = null;
             document.getElementById('streakModal').classList.remove('open');
-            updateEconomyUI();
         }
 
         // Initialize economy UI on page load

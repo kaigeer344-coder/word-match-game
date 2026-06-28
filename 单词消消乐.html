@@ -13637,11 +13637,11 @@
                 .sort((a, b) => a.memoryData.familiarity - b.memoryData.familiarity)
                 .forEach(word => addWord(word, '模糊巩固', 3));
 
-            words
-                .filter(word => word.memoryData.reviewCount === 0 || word.memoryData.status === 'new')
-                .sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1))
-                .slice(0, state.newWordQuota)
-                .forEach(word => addWord(word, '今日新词', 4));
+            const newWords = words.filter(word => word.memoryData.reviewCount === 0 || word.memoryData.status === 'new');
+            const sortedNewWords = state.wordOrder === 'random'
+                ? shuffle(newWords)
+                : newWords.sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1));
+            sortedNewWords.slice(0, state.newWordQuota).forEach(word => addWord(word, '今日新词', 4));
 
             state.todayQueue = [...queued.values()].sort((a, b) => a.queuePriority - b.queuePriority);
             return state.todayQueue;
@@ -13659,7 +13659,9 @@
                 }
             });
             if (selected.length < count && !state.todayTaskStarted) {
-                MemorySystem.getAllWords(state.level).forEach(word => {
+                let allWords = MemorySystem.getAllWords(state.level);
+                if (state.wordOrder === 'random') allWords = shuffle(allWords);
+                allWords.forEach(word => {
                     if (selected.length < count && !seen.has(word.wordId) && !state.completedToday.has(word.wordId)) {
                         selected.push({ ...word, queueReason: '补充练习', queuePriority: 5 });
                         seen.add(word.wordId);
@@ -13667,7 +13669,9 @@
                 });
                 if (!selected.length) {
                     state.completedToday.clear();
-                    MemorySystem.getAllWords(state.level).slice(0, count).forEach(word => {
+                    let remainingWords = MemorySystem.getAllWords(state.level);
+                    if (state.wordOrder === 'random') remainingWords = shuffle(remainingWords);
+                    remainingWords.slice(0, count).forEach(word => {
                         selected.push({ ...word, queueReason: '循环巩固', queuePriority: 6 });
                     });
                 }

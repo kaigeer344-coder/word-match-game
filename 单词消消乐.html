@@ -14942,6 +14942,18 @@
         updateEconomyUI();
         checkDailyStreak();
 
+        // Modal close: click overlay or press Escape
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(overlay => overlay.classList.remove('open'));
+            }
+        });
+
         // ===== Stats Screen =====
         function showStats() {
             const level = state.level || 'cet4';

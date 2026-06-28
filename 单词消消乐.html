@@ -2399,6 +2399,8 @@
     </style>
 </head>
 <body>
+    <!-- Hidden audio element for unlocking audio on iOS Safari -->
+    <audio id="silentAudio" preload="auto" src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQIAAAAAAA==" style="display:none"></audio>
     <div class="game-container">
         <!-- Header -->
         <div class="game-header">
@@ -2423,22 +2425,22 @@
             <p>配对英文单词和中文释义<br>在游戏中轻松记住单词</p>
             
             <div class="level-selector">
-                <div class="level-btn selected" data-level="cet4" onclick="selectLevel(this)">
+                <div class="level-btn selected" data-level="cet4" ontouchstart="unlockAudio()" onclick="selectLevel(this)">
                     <div class="level-icon"><img src="assets/icon-cet4.png" alt=""></div>
                     <div class="level-name">四级词汇</div>
                     <div class="level-desc">基础必备</div>
                 </div>
-                <div class="level-btn" data-level="cet6" onclick="selectLevel(this)">
+                <div class="level-btn" data-level="cet6" ontouchstart="unlockAudio()" onclick="selectLevel(this)">
                     <div class="level-icon"><img src="assets/icon-cet6.png" alt=""></div>
                     <div class="level-name">六级词汇</div>
                     <div class="level-desc">进阶提升</div>
                 </div>
-                <div class="level-btn" data-level="toefl" onclick="selectLevel(this)">
+                <div class="level-btn" data-level="toefl" ontouchstart="unlockAudio()" onclick="selectLevel(this)">
                     <div class="level-icon"><img src="assets/icon-toefl.png" alt=""></div>
                     <div class="level-name">托福词汇</div>
                     <div class="level-desc">留学必备</div>
                 </div>
-                <div class="level-btn" data-level="gre" onclick="selectLevel(this)">
+                <div class="level-btn" data-level="gre" ontouchstart="unlockAudio()" onclick="selectLevel(this)">
                     <div class="level-icon"><img src="assets/icon-gre.png" alt=""></div>
                     <div class="level-name">GRE词汇</div>
                     <div class="level-desc">挑战高难</div>
@@ -2476,12 +2478,12 @@
             </div>
 
             <div class="economy-bar" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-                <button class="shop-btn" onclick="openShop()">🛒 商店</button>
-                <button class="shop-btn" onclick="showStats()">📊 统计</button>
-                <button class="shop-btn" onclick="showWordBook()">📚 词书</button>
+                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="openShop()">🛒 商店</button>
+                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="showStats()">📊 统计</button>
+                <button class="shop-btn" ontouchstart="unlockAudio()" onclick="showWordBook()">📚 词书</button>
             </div>
 
-            <button class="btn-primary" onclick="startTodayTask()">开始今日任务</button>
+            <button class="btn-primary" ontouchstart="unlockAudio()" onclick="startTodayTask()">开始今日任务</button>
         </div>
 
         <!-- Learning Screen -->
@@ -13092,12 +13094,12 @@
         const ECONOMY_KEY = 'wordmatch_economy';
         const LEVELS = [
             { lv: 1, score: 0, title: '新手上路' },
-            { lv: 2, score: 500, title: '初窥门径' },
-            { lv: 3, score: 2000, title: '小有所成' },
-            { lv: 4, score: 5000, title: '词汇达人' },
-            { lv: 5, score: 10000, title: '学霸' },
-            { lv: 6, score: 25000, title: '词汇大师' },
-            { lv: 7, score: 50000, title: '词王' }
+            { lv: 2, score: 1500, title: '初窥门径' },
+            { lv: 3, score: 6000, title: '小有所成' },
+            { lv: 4, score: 18000, title: '词汇达人' },
+            { lv: 5, score: 45000, title: '学霸' },
+            { lv: 6, score: 100000, title: '词汇大师' },
+            { lv: 7, score: 250000, title: '词王' }
         ];
         const SHOP_ITEMS = {
             hint:   { name: '提示', price: 10, icon: '💡' },
@@ -13240,21 +13242,65 @@
         // ===== Sound Effects System (Web Audio API) =====
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
+        let audioUnlockPromise = null;
         const silentAudioCtx = {
             currentTime: 0,
             state: 'running',
             destination: {},
-            resume() {},
+            resume() { return Promise.resolve(); },
             createOscillator() { return { connect() {}, start() {}, stop() {}, frequency: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }; },
-            createGain() { return { connect() {}, gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} } }; }
+            createGain() { return { connect() {}, gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} } }; },
+            createBuffer() { return { getChannelData() { return new Float32Array(1); } }; },
+            createBufferSource() { return { connect() {}, start() {}, stop() {}, buffer: null }; }
         };
 
+        // Create AudioContext eagerly during a user gesture (critical for mobile Safari)
+        function createAudioCtx() {
+            if (!AudioCtx) return null;
+            try {
+                const ctx = new AudioCtx();
+                return ctx;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Play a silent buffer to fully unlock audio on restrictive browsers (iOS Safari)
+        function playSilentBuffer(ctx) {
+            try {
+                const buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+                const source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(ctx.destination);
+                source.start(0);
+            } catch (e) {}
+        }
+
+        // Robust getAudioCtx with proper async resume handling
+        let resumePromise = null;
         function getAudioCtx() {
             if (!AudioCtx) return silentAudioCtx;
             try {
-                if (!audioCtx) audioCtx = new AudioCtx();
+                if (!audioCtx) {
+                    audioCtx = createAudioCtx();
+                    if (!audioCtx) return silentAudioCtx;
+                }
                 if (audioCtx.state === 'suspended') {
-                    audioCtx.resume().catch(() => {});
+                    // Await resume and retry once if still suspended
+                    if (!resumePromise) {
+                        resumePromise = audioCtx.resume().then(() => {
+                            resumePromise = null;
+                        }).catch(() => {
+                            resumePromise = null;
+                        });
+                    }
+                    // Try to return context even if resume is pending;
+                    // sounds scheduled slightly in the future will still play
+                }
+                if (audioCtx.state === 'closed') {
+                    // Recreate if closed (can happen on some mobile browsers)
+                    audioCtx = createAudioCtx();
+                    if (!audioCtx) return silentAudioCtx;
                 }
                 return audioCtx;
             } catch (e) {
@@ -13443,7 +13489,9 @@
         function playTone(freq, duration = 0.1, type = 'sine', volume = 0.12, delay = 0, slideTo = null) {
             const ctx = getAudioCtx();
             if (ctx === silentAudioCtx) return;
-            const start = ctx.currentTime + delay;
+            // Add a small safety margin to avoid scheduling in the past during resume
+            const safetyOffset = (audioCtx && audioCtx.state === 'suspended') ? 0.05 : 0;
+            const start = ctx.currentTime + delay + safetyOffset;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -13463,39 +13511,123 @@
         }
 
         let audioUnlocked = false;
+        let unlockAttemptCount = 0;
         function unlockAudio() {
-            if (audioUnlocked) return;
+            unlockAttemptCount++;
             try {
-                if (!audioCtx && AudioCtx) audioCtx = new AudioCtx();
-                if (!audioCtx) return;
-                const resumePromise = audioCtx.resume();
-                if (resumePromise && resumePromise.then) {
-                    resumePromise.then(() => {
-                        if (audioCtx.state === 'running') {
+                // STEP 1: Play HTML5 silent audio element (most reliable for iOS Safari)
+                const silentEl = document.getElementById('silentAudio');
+                if (silentEl) {
+                    silentEl.currentTime = 0;
+                    const p = silentEl.play();
+                    if (p && p.then) {
+                        p.then(() => {
                             audioUnlocked = true;
-                            playTone(660, 0.035, 'sine', 0.025);
                             removeUnlockListeners();
-                        }
-                    }).catch(() => {});
-                } else if (audioCtx.state === 'running') {
-                    audioUnlocked = true;
-                    playTone(660, 0.035, 'sine', 0.025);
-                    removeUnlockListeners();
+                        }).catch(() => {});
+                    }
+                }
+
+                // STEP 1b: Also try a dynamically created Audio object (fallback)
+                try {
+                    const dynAudio = new Audio();
+                    dynAudio.src = 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQIAAAAAAA==';
+                    dynAudio.volume = 0.01;
+                    const dp = dynAudio.play();
+                    if (dp && dp.then) {
+                        dp.then(() => {
+                            audioUnlocked = true;
+                            removeUnlockListeners();
+                        }).catch(() => {});
+                    }
+                } catch (e) {}
+
+                // STEP 2: Create AudioContext during user gesture (required by iOS)
+                if (!audioCtx && AudioCtx) {
+                    audioCtx = new AudioCtx();
+                }
+                if (!audioCtx) return;
+
+                // STEP 3: Play Web Audio silent buffer synchronously during gesture
+                playSilentBuffer(audioCtx);
+
+                // STEP 3b: Also play a real (very quiet) oscillator tone during the gesture.
+                // Some iOS versions require actual sound output to fully unlock Web Audio.
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    osc.connect(g);
+                    g.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                    g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.01);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.01);
+                } catch (e) {}
+
+                // STEP 4: Resume the AudioContext
+                const resumeResult = audioCtx.resume();
+                const markUnlocked = () => {
+                    if (audioCtx && audioCtx.state === 'running') {
+                        audioUnlocked = true;
+                        removeUnlockListeners();
+                    }
+                };
+
+                if (resumeResult && resumeResult.then) {
+                    resumeResult.then(markUnlocked).catch(() => {
+                        setTimeout(() => {
+                            if (audioCtx && !audioUnlocked) {
+                                audioCtx.resume().then(markUnlocked).catch(() => {});
+                            }
+                        }, 100);
+                    });
+                } else {
+                    markUnlocked();
+                }
+
+                // STEP 5: If still not unlocked after several attempts, recreate AudioContext
+                if (!audioUnlocked && unlockAttemptCount >= 3 && AudioCtx) {
+                    try {
+                        audioCtx = new AudioCtx();
+                        playSilentBuffer(audioCtx);
+                        audioCtx.resume().then(markUnlocked).catch(() => {});
+                    } catch (e) {}
                 }
             } catch (e) {}
         }
+
         function removeUnlockListeners() {
-            document.removeEventListener('pointerdown', unlockAudio);
-            document.removeEventListener('touchstart', unlockAudio);
-            document.removeEventListener('touchend', unlockAudio);
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('keydown', unlockAudio);
+            document.removeEventListener('pointerdown', unlockAudio, true);
+            document.removeEventListener('touchstart', unlockAudio, true);
+            document.removeEventListener('touchend', unlockAudio, true);
+            document.removeEventListener('click', unlockAudio, true);
+            document.removeEventListener('keydown', unlockAudio, true);
+            window.removeEventListener('scroll', unlockAudio, true);
         }
-        document.addEventListener('pointerdown', unlockAudio);
-        document.addEventListener('touchstart', unlockAudio, { passive: true });
-        document.addEventListener('touchend', unlockAudio, { passive: true });
-        document.addEventListener('click', unlockAudio);
-        document.addEventListener('keydown', unlockAudio);
+
+        // Use capture phase to ensure we catch events before they might be stopped
+        document.addEventListener('pointerdown', unlockAudio, true);
+        document.addEventListener('touchstart', unlockAudio, { capture: true, passive: true });
+        document.addEventListener('touchend', unlockAudio, { capture: true, passive: true });
+        document.addEventListener('click', unlockAudio, true);
+        document.addEventListener('keydown', unlockAudio, true);
+        window.addEventListener('scroll', unlockAudio, { capture: true, passive: true });
+
+        // Also try to unlock on visibility change (useful when switching tabs on mobile)
+        document.addEventListener('visibilitychange', function onVisibility() {
+            if (!document.hidden && audioCtx && audioCtx.state === 'suspended') {
+                playSilentBuffer(audioCtx);
+                audioCtx.resume().then(() => {
+                    if (audioCtx.state === 'running') {
+                        audioUnlocked = true;
+                        removeUnlockListeners();
+                        document.removeEventListener('visibilitychange', onVisibility);
+                    }
+                }).catch(() => {});
+            }
+        });
 
         Object.assign(SFX, {
             taskStart() { playSequence([392, 523, 659], 0.07, 'triangle', 0.12, 0.14); },
@@ -13879,6 +14011,9 @@
         }
 
         function startTodayTask() {
+            // Force audio unlock during this user gesture (critical for mobile Safari)
+            if (!audioUnlocked) unlockAudio();
+            if (audioCtx) playSilentBuffer(audioCtx);
             SFX.taskStart();
             clearInterval(state.timerInterval);
             state.currentLevel = 1;
@@ -13939,6 +14074,7 @@
 
         // Learning Phase
         function startLearning() {
+            if (!audioUnlocked) unlockAudio();
             if (!state.todayTaskStarted) {
                 state.todayTaskStarted = true;
                 buildTodayQueue(state.level);
@@ -14032,6 +14168,7 @@
 
         // Game Phase
         function startGame() {
+            if (!audioUnlocked) unlockAudio();
             SFX.roundStart();
             state.gameScore = 0;
             state.combo = 0;
@@ -14182,7 +14319,7 @@
 
             // Calculate score with combo bonus + multiplier
             const mult = state.scoreMultiplier || 1;
-            let points = (10 + (state.combo - 1) * 5) * mult;
+            let points = (5 + (state.combo - 1) * 3) * mult;
             state.gameScore += points;
             document.getElementById('gameScore').textContent = state.gameScore;
 
@@ -14653,7 +14790,7 @@
 
             // Bonus for time remaining
             if (completed) {
-                state.gameScore += state.timeLeft * 2;
+                state.gameScore += state.timeLeft;
             }
             state.lastTotalScoreBeforeRound = EconomySystem.data.totalScore;
             state.totalScore = EconomySystem.data.totalScore + state.gameScore;
@@ -14661,7 +14798,7 @@
             // Write to economy
             const prevLevel = EconomySystem.getLevel();
             EconomySystem.addScore(state.gameScore);
-            const coinReward = Math.max(0, Math.round(state.gameScore / 20));
+            const coinReward = Math.max(0, Math.round(state.gameScore / 25));
             const starCount = getResultStarCount(completed, state.correct + state.wrong > 0 ? Math.round((state.correct / (state.correct + state.wrong)) * 100) : 0, isTodayTaskComplete());
             const gemReward = starCount >= 3 ? 1 : 0;
             EconomySystem.addCoins(coinReward);
@@ -14736,7 +14873,7 @@
             const badge = document.getElementById('resultIcon');
             const stars = [...document.querySelectorAll('#resultStars .star')];
             const starCount = getResultStarCount(completed, accuracy, todayDone);
-            const coinReward = Math.max(0, Math.round(state.gameScore / 20));
+            const coinReward = Math.max(0, Math.round(state.gameScore / 25));
             const gemReward = starCount >= 3 ? 1 : 0;
             SFX.settlementStart(todayDone);
 

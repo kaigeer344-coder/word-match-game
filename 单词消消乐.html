@@ -14011,8 +14011,8 @@
             if (!state.currentWords.length) {
                 buildTodayQueue(state.level);
                 state.currentWords = selectRoundWordsFromQueue(state.wordsPerRound);
-            if (state.wordOrder === 'random') state.currentWords = shuffle(state.currentWords);
             }
+            if (state.wordOrder === 'random') state.currentWords = shuffle(state.currentWords);
             initRoundPerformance();
             state.roundStartedAt = Date.now();
             state.roundFinalized = false;

@@ -2434,20 +2434,14 @@
                     </div>
                     <button class="count-btn" onclick="changeWordCount(1)">+</button>
                 </div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;">
+                    <span style="font-size:12px;color:var(--muted);font-weight:700;">顺序</span>
+                    <button class="filter-tab active" id="orderSeqBtn" onclick="setWordOrder('sequential')" style="font-size:11px;padding:3px 10px;">A→Z</button>
+                    <button class="filter-tab" id="orderRandBtn" onclick="setWordOrder('random')" style="font-size:11px;padding:3px 10px;">🔀 乱序</button>
+                </div>
                 <div class="time-estimate" id="timeEstimate">
                     词库共 <span id="totalWordsCount">100</span> 词，剩余词数约需 <strong id="daysEstimate">4</strong> 天学完
                     <div id="progressStats"></div>
-                </div>
-            </div>
-
-            <!-- Shuffle Toggle -->
-            <div class="word-count-section" style="margin-bottom:16px;padding:12px 16px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <span class="section-label" style="margin:0">单词顺序</span>
-                    <div style="display:flex;gap:6px;">
-                        <button class="filter-tab active" id="orderSeqBtn" onclick="setWordOrder('sequential')" style="font-size:11px;padding:4px 12px;">顺序</button>
-                        <button class="filter-tab" id="orderRandBtn" onclick="setWordOrder('random')" style="font-size:11px;padding:4px 12px;">🔀 乱序</button>
-                    </div>
                 </div>
             </div>
 
@@ -14002,6 +13996,7 @@
             startTimer();
             clearComboEffects();
             showScreen('gameScreen');
+            showFirstTimeHint();
         }
 
         function renderBoard() {
@@ -14170,10 +14165,81 @@
                 tile1.classList.add('eliminated');
                 tile2.classList.add('eliminated');
                 cascadeTiles(tile1, tile2);
-                setTimeout(() => checkGameComplete(), 350);
+                setTimeout(() => {
+                    checkGameComplete();
+                    highlightNextPair();
+                }, 350);
             }, 400);
 
             state.selectedTile = null;
+        }
+
+        function highlightNextPair() {
+            const board = document.getElementById('gameBoard');
+            if (!board) return;
+            const tiles = board.querySelectorAll('.tile:not(.eliminated)');
+            if (tiles.length < 2) return;
+
+            // Group remaining tiles by wordIndex
+            const byIndex = {};
+            tiles.forEach(t => {
+                const wi = t.dataset.wordIndex;
+                if (!byIndex[wi]) byIndex[wi] = [];
+                byIndex[wi].push(t);
+            });
+
+            // Find first pair with both English and Chinese tiles
+            for (const wi in byIndex) {
+                const group = byIndex[wi];
+                const en = group.find(t => t.classList.contains('english'));
+                const cn = group.find(t => t.classList.contains('chinese'));
+                if (en && cn) {
+                    en.classList.add('hint');
+                    cn.classList.add('hint');
+                    setTimeout(() => {
+                        en.classList.remove('hint');
+                        cn.classList.remove('hint');
+                    }, 1200);
+                    return;
+                }
+            }
+        }
+
+        function showFirstTimeHint() {
+            const key = 'wordmatch_firstPlayDone';
+            if (localStorage.getItem(key)) return;
+            localStorage.setItem(key, '1');
+
+            // Wait for board to render, then show a subtle hint
+            setTimeout(() => {
+                const board = document.getElementById('gameBoard');
+                if (!board) return;
+                const tiles = board.querySelectorAll('.tile:not(.eliminated)');
+                if (tiles.length < 2) return;
+
+                const byIndex = {};
+                tiles.forEach(t => {
+                    const wi = t.dataset.wordIndex;
+                    if (!byIndex[wi]) byIndex[wi] = [];
+                    byIndex[wi].push(t);
+                });
+
+                for (const wi in byIndex) {
+                    const group = byIndex[wi];
+                    const en = group.find(t => t.classList.contains('english'));
+                    const cn = group.find(t => t.classList.contains('chinese'));
+                    if (en && cn) {
+                        en.classList.add('hint');
+                        cn.classList.add('hint');
+                        // Show longer for first-time hint
+                        setTimeout(() => {
+                            en.classList.remove('hint');
+                            cn.classList.remove('hint');
+                        }, 2500);
+                        return;
+                    }
+                }
+            }, 600);
         }
 
         function handleWrongMatch(tile1, tile2) {

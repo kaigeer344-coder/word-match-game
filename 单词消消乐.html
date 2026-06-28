@@ -13171,6 +13171,7 @@
                 if (!this.data) this.load();
                 const today = new Date().toISOString().slice(0, 10);
                 if (this.data.lastPlayDate === today) return { isNew: false, streak: this.data.streak };
+                const isFirstVisit = !this.data.lastPlayDate;
                 const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
                 if (this.data.lastPlayDate === yesterday) {
                     this.data.streak = (this.data.streak || 0) + 1;
@@ -13180,7 +13181,7 @@
                 this.data.lastPlayDate = today;
                 this.data.totalDays = (this.data.totalDays || 0) + 1;
                 this.save();
-                return { isNew: true, streak: this.data.streak };
+                return { isNew: true, streak: this.data.streak, isFirstVisit: isFirstVisit };
             },
 
             getStreakReward(streak) {
@@ -14873,6 +14874,13 @@
             const result = EconomySystem.checkStreak();
             if (!result.isNew) return;
             const reward = EconomySystem.getStreakReward(result.streak);
+            // 首次访问直接发放奖励，不弹窗打扰
+            if (result.isFirstVisit) {
+                EconomySystem.addCoins(reward.coins);
+                if (reward.gems > 0) EconomySystem.addGems(reward.gems);
+                updateEconomyUI();
+                return;
+            }
             // Show streak popup
             const daysEl = document.getElementById('streakDays');
             if (daysEl) daysEl.textContent = result.streak;

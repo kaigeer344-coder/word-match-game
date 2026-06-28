@@ -1166,6 +1166,9 @@
             border-bottom: 6px solid var(--primary-dark);
             color: #ffffff;
             box-shadow: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .game-header h1 {
@@ -1175,6 +1178,8 @@
             gap: 10px;
             font-size: 21px;
             font-weight: 900;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .game-header h1::before {
@@ -1191,7 +1196,7 @@
             font-weight: 1000;
         }
 
-        .header-stats { gap: 8px; }
+        .header-stats { gap: 8px; flex-direction: row !important; align-items: center !important; }
 
         .stat-item {
             min-width: 68px;
@@ -1966,6 +1971,7 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-direction: row;
         }
         .economy-badge {
             display: flex;
@@ -1980,7 +1986,7 @@
         }
         .economy-badge.coins { color: #d4a017; border-color: #f0d060; }
         .economy-badge.gems { color: #8b5cf6; border-color: #c4b5fd; }
-        .economy-badge.level { color: var(--primary-dark); border-color: var(--primary); font-size: 12px; }
+        .economy-badge.level { color: var(--primary-dark); border-color: var(--primary); font-size: 12px; white-space: nowrap; }
 
         /* === Economy: Start screen additions === */
         .economy-bar {
@@ -2358,6 +2364,8 @@
                 padding: 6px 7px;
                 font-size: 10px;
             }
+            .economy-badge.level { font-size: 10px; padding: 3px 7px; }
+            .economy-badge { padding: 3px 7px; font-size: 11px; }
             .stat-value {
                 font-size: 15px;
             }

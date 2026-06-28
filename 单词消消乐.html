@@ -42,6 +42,8 @@
             box-shadow: 0 12px 40px rgba(90,176,168,0.15), 0 4px 12px rgba(0,0,0,0.04);
             overflow: hidden;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Header */
@@ -2207,7 +2209,7 @@
         .stats-detail-item .sd-label { font-size: 11px; color: var(--muted); font-weight: 700; }
 
         /* === Word Book Screen === */
-        .wb-screen { padding: 16px; height: 100vh; max-height: 100vh; }
+        .wb-screen { padding: 16px; flex: 1; min-height: 0; }
         .wb-header {
             display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-shrink: 0;
         }
@@ -2562,6 +2564,30 @@
                 <button class="btn-retry" id="resultContinueBtn" onclick="continueTodayTask()">继续今日任务</button>
             </div>
         </div>
+
+        <!-- Stats Screen -->
+        <div class="screen stats-screen" id="statsScreen">
+            <button class="stats-back-btn" onclick="goHome()">← 返回首页</button>
+            <div class="stats-title">📊 学习统计</div>
+            <div class="stats-overview" id="statsOverview"></div>
+            <div class="pie-section">
+                <div class="pie-chart" id="pieChart"></div>
+                <div class="pie-legend" id="pieLegend"></div>
+            </div>
+            <div class="stats-progress" id="statsProgress"></div>
+            <div class="stats-detail" id="statsDetail"></div>
+        </div>
+
+        <!-- Word Book Screen -->
+        <div class="screen wb-screen" id="wordBookScreen">
+            <div class="wb-header">
+                <button class="stats-back-btn" onclick="goHome()" style="margin:0">← 返回</button>
+                <input type="text" class="wb-search" id="wbSearch" placeholder="搜索单词或释义..." oninput="searchWordBook(this.value)">
+            </div>
+            <div class="filter-tabs" id="wbFilters"></div>
+            <div class="wb-list" id="wbList"></div>
+            <div class="wb-footer" id="wbFooter"></div>
+        </div>
     </div>
 
     <!-- Shop Modal -->
@@ -2583,30 +2609,6 @@
             <div class="streak-rewards" id="streakRewards"></div>
             <button class="streak-claim-btn" onclick="claimStreakReward()">领取奖励</button>
         </div>
-    </div>
-
-    <!-- Stats Screen -->
-    <div class="screen stats-screen" id="statsScreen">
-        <button class="stats-back-btn" onclick="goHome()">← 返回首页</button>
-        <div class="stats-title">📊 学习统计</div>
-        <div class="stats-overview" id="statsOverview"></div>
-        <div class="pie-section">
-            <div class="pie-chart" id="pieChart"></div>
-            <div class="pie-legend" id="pieLegend"></div>
-        </div>
-        <div class="stats-progress" id="statsProgress"></div>
-        <div class="stats-detail" id="statsDetail"></div>
-    </div>
-
-    <!-- Word Book Screen -->
-    <div class="screen wb-screen" id="wordBookScreen">
-        <div class="wb-header">
-            <button class="stats-back-btn" onclick="goHome()" style="margin:0">← 返回</button>
-            <input type="text" class="wb-search" id="wbSearch" placeholder="搜索单词或释义..." oninput="searchWordBook(this.value)">
-        </div>
-        <div class="filter-tabs" id="wbFilters"></div>
-        <div class="wb-list" id="wbList"></div>
-        <div class="wb-footer" id="wbFooter"></div>
     </div>
 
     <script>

@@ -2460,8 +2460,8 @@
                 </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;">
                     <span style="font-size:12px;color:var(--muted);font-weight:700;">顺序</span>
-                    <button class="filter-tab active" id="orderSeqBtn" onclick="setWordOrder('sequential')" style="font-size:11px;padding:3px 10px;">A→Z</button>
-                    <button class="filter-tab" id="orderRandBtn" onclick="setWordOrder('random')" style="font-size:11px;padding:3px 10px;">🔀 乱序</button>
+                    <button class="filter-tab" id="orderSeqBtn" onclick="setWordOrder('sequential')" style="font-size:11px;padding:3px 10px;">A→Z</button>
+                    <button class="filter-tab active" id="orderRandBtn" onclick="setWordOrder('random')" style="font-size:11px;padding:3px 10px;">🔀 乱序</button>
                 </div>
                 <div class="time-estimate" id="timeEstimate">
                     词库共 <span id="totalWordsCount">100</span> 词，剩余词数约需 <strong id="daysEstimate">4</strong> 天学完
@@ -12806,7 +12806,7 @@
             wordEncounters: {},
             gameActive: false,
             wordsPerRound: 10,
-            wordOrder: 'sequential',
+            wordOrder: 'random',
             dailyRounds: 3,
             todayQueue: [],
             completedToday: new Set(),
@@ -12974,25 +12974,46 @@
             intervals: [5 * 60 * 1000, 15 * 60 * 1000, 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000, 15 * 24 * 60 * 60 * 1000, 30 * 24 * 60 * 60 * 1000],
             shortIntervals: { retry: 60 * 1000, wrong: 5 * 60 * 1000, hint: 15 * 60 * 1000 },
             _memoryCache: null,
+            _allWordsCache: {},
+            _keySet: null,
 
-            ensureMemoryCache() {
-                if (this._memoryCache) return;
-                this._memoryCache = new Map();
+            _initCache() {
+                if (!this._memoryCache) this._memoryCache = new Map();
+            },
+
+            _buildKeySet() {
+                if (this._keySet) return;
+                this._keySet = new Set();
                 try {
                     for (let i = 0; i < localStorage.length; i++) {
                         const key = localStorage.key(i);
-                        if (key && key.startsWith('wordmem_')) {
-                            try {
-                                const value = JSON.parse(localStorage.getItem(key));
-                                this._memoryCache.set(key, value);
-                            } catch (e) {
-                                // ignore malformed entries
-                            }
-                        }
+                        if (key && key.startsWith('wordmem_')) this._keySet.add(key);
                     }
                 } catch (e) {
                     // localStorage may be unavailable
                 }
+            },
+
+            _loadKey(fullKey) {
+                this._buildKeySet();
+                this._initCache();
+                if (this._memoryCache.has(fullKey)) return this._memoryCache.get(fullKey);
+                if (!this._keySet.has(fullKey)) {
+                    this._memoryCache.set(fullKey, null);
+                    return null;
+                }
+                try {
+                    const stored = localStorage.getItem(fullKey);
+                    if (stored) {
+                        const value = JSON.parse(stored);
+                        this._memoryCache.set(fullKey, value);
+                        return value;
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                this._memoryCache.set(fullKey, null);
+                return null;
             },
 
             getWordId(level, word, index) {
@@ -13038,9 +13059,7 @@
             },
 
             getStoredMemory(storageKey) {
-                this.ensureMemoryCache();
-                const value = this._memoryCache.get(`wordmem_${storageKey}`);
-                return value !== undefined ? value : null;
+                return this._loadKey(`wordmem_${storageKey}`);
             },
 
             getMemoryForWord(level, word, index) {
@@ -13051,10 +13070,13 @@
             },
 
             saveWordMemory(wordKey, mem) {
-                this.ensureMemoryCache();
+                this._buildKeySet();
+                this._initCache();
                 const normalized = this.normalizeMemory(mem, wordKey);
                 const fullKey = `wordmem_${wordKey}`;
                 this._memoryCache.set(fullKey, normalized);
+                this._keySet.add(fullKey);
+                this._allWordsCache = {}; // 缓存失效
                 try {
                     localStorage.setItem(fullKey, JSON.stringify(normalized));
                 } catch (e) {
@@ -13071,7 +13093,10 @@
             },
 
             getAllWords(level) {
-                return wordDB[level].map((word, index) => this.hydrateWord(level, word, index));
+                if (this._allWordsCache[level]) return this._allWordsCache[level];
+                const words = wordDB[level].map((word, index) => this.hydrateWord(level, word, index));
+                this._allWordsCache[level] = words;
+                return words;
             },
 
             getLearningStats(level) {
@@ -14066,10 +14091,12 @@
             updateTodayProgressHeader();
         }
 
-        // Init estimate on page load
+        // Init estimate on page load (defer to allow first paint)
         document.addEventListener('DOMContentLoaded', () => {
             loadWordOrder();
-            updateEstimate();
+            requestAnimationFrame(() => {
+                setTimeout(updateEstimate, 0);
+            });
         });
 
         // Learning Phase
@@ -15108,9 +15135,13 @@
             document.getElementById('streakModal').classList.remove('open');
         }
 
-        // Initialize economy UI on page load
-        updateEconomyUI();
-        checkDailyStreak();
+        // Initialize economy UI on page load (defer to allow first paint)
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                updateEconomyUI();
+                checkDailyStreak();
+            }, 0);
+        });
 
         // Modal close: click overlay or press Escape
         document.querySelectorAll('.modal-overlay').forEach(overlay => {

@@ -85,6 +85,11 @@
         .screen.active {
             display: block;
         }
+        .screen.wb-screen.active,
+        .screen.stats-screen.active {
+            display: flex;
+            flex-direction: column;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -2228,7 +2233,7 @@
         .filter-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary-dark); }
         .wb-list {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
-            padding-bottom: 8px;
+            padding-bottom: 8px; min-height: 0;
         }
         .wb-item {
             display: flex; align-items: center; gap: 10px; padding: 12px 14px;

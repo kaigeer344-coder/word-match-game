@@ -13575,11 +13575,25 @@
             updateEstimate();
         }
 
+        const WORD_ORDER_KEY = 'wordmatch_wordOrder';
         function setWordOrder(order) {
             SFX.click();
             state.wordOrder = order;
+            try {
+                localStorage.setItem(WORD_ORDER_KEY, order);
+            } catch (e) {}
             document.getElementById('orderSeqBtn').classList.toggle('active', order === 'sequential');
             document.getElementById('orderRandBtn').classList.toggle('active', order === 'random');
+        }
+        function loadWordOrder() {
+            try {
+                const saved = localStorage.getItem(WORD_ORDER_KEY);
+                if (saved === 'random' || saved === 'sequential') {
+                    state.wordOrder = saved;
+                    document.getElementById('orderSeqBtn').classList.toggle('active', saved === 'sequential');
+                    document.getElementById('orderRandBtn').classList.toggle('active', saved === 'random');
+                }
+            } catch (e) {}
         }
 
         // ===== Daily Queue and Round Memory =====
@@ -13915,6 +13929,7 @@
 
         // Init estimate on page load
         document.addEventListener('DOMContentLoaded', () => {
+            loadWordOrder();
             updateEstimate();
         });
 
@@ -14220,7 +14235,7 @@
                 tile2.classList.add('eliminated');
                 setTimeout(() => {
                     checkGameComplete();
-                    highlightNextPair();
+                    if (state.combo >= 5) highlightNextPair();
                 }, 250);
             }, 400);
 
@@ -14476,16 +14491,9 @@
                 }
             });
 
-            if (combo === 3 && remainingPairs.length > 0) {
-                // Reveal a pair for 1.5s
-                const pair = remainingPairs[Math.floor(Math.random() * remainingPairs.length)];
-                pair.enTile.classList.add('hint');
-                pair.cnTile.classList.add('hint');
-                showComboReward('✨ 慧眼!');
-                setTimeout(() => {
-                    pair.enTile.classList.remove('hint');
-                    pair.cnTile.classList.remove('hint');
-                }, 1500);
+            if (combo === 3) {
+                // 3 连击鼓励，不再提前揭示答案（高亮门槛统一为 5 连击）
+                showComboReward('✨ x3 连击!');
             } else if (combo === 4) {
                 // +5s bonus time
                 state.timeLeft += 5;

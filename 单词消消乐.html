@@ -12958,6 +12958,27 @@
         const MemorySystem = {
             intervals: [5 * 60 * 1000, 15 * 60 * 1000, 24 * 60 * 60 * 1000, 3 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000, 15 * 24 * 60 * 60 * 1000, 30 * 24 * 60 * 60 * 1000],
             shortIntervals: { retry: 60 * 1000, wrong: 5 * 60 * 1000, hint: 15 * 60 * 1000 },
+            _memoryCache: null,
+
+            ensureMemoryCache() {
+                if (this._memoryCache) return;
+                this._memoryCache = new Map();
+                try {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('wordmem_')) {
+                            try {
+                                const value = JSON.parse(localStorage.getItem(key));
+                                this._memoryCache.set(key, value);
+                            } catch (e) {
+                                // ignore malformed entries
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // localStorage may be unavailable
+                }
+            },
 
             getWordId(level, word, index) {
                 return `${level}_${index}_${word.en}`;
@@ -13002,13 +13023,9 @@
             },
 
             getStoredMemory(storageKey) {
-                const stored = localStorage.getItem(`wordmem_${storageKey}`);
-                if (!stored) return null;
-                try {
-                    return JSON.parse(stored);
-                } catch (e) {
-                    return null;
-                }
+                this.ensureMemoryCache();
+                const value = this._memoryCache.get(`wordmem_${storageKey}`);
+                return value !== undefined ? value : null;
             },
 
             getMemoryForWord(level, word, index) {
@@ -13019,7 +13036,16 @@
             },
 
             saveWordMemory(wordKey, mem) {
-                localStorage.setItem(`wordmem_${wordKey}`, JSON.stringify(this.normalizeMemory(mem, wordKey)));
+                this.ensureMemoryCache();
+                const normalized = this.normalizeMemory(mem, wordKey);
+                const fullKey = `wordmem_${wordKey}`;
+                this._memoryCache.set(fullKey, normalized);
+                try {
+                    localStorage.setItem(fullKey, JSON.stringify(normalized));
+                } catch (e) {
+                    console.warn('localStorage 写入失败，可能是存储空间不足', e);
+                }
+                return normalized;
             },
 
             hydrateWord(level, word, index) {
@@ -15098,10 +15124,21 @@
         }
 
         function toggleBookmark(wordId) {
-            const stored = localStorage.getItem('wordmem_' + wordId);
-            let mem = stored ? JSON.parse(stored) : {};
+            const level = state.level || 'cet4';
+            const parts = wordId.split('_');
+            const index = parts.length >= 2 ? parseInt(parts[1]) : -1;
+            let word = null;
+            if (index >= 0 && wordDB[level] && wordDB[level][index]) {
+                word = wordDB[level][index];
+            } else {
+                // fallback: find by en
+                const en = parts.slice(2).join('_');
+                word = wordDB[level].find(w => w.en === en);
+            }
+            if (!word) return;
+            const mem = MemorySystem.getMemoryForWord(level, word, index >= 0 ? index : wordDB[level].indexOf(word));
             mem.bookmarked = !mem.bookmarked;
-            localStorage.setItem('wordmem_' + wordId, JSON.stringify(mem));
+            MemorySystem.saveWordMemory(wordId, mem);
             renderWBList();
         }
     </script>

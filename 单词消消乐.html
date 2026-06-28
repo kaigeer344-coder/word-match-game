@@ -14026,6 +14026,7 @@
             state.timeCount = EconomySystem.getItemCount('time');
             state.shuffleCount = EconomySystem.getItemCount('shuffle');
             state.gameActive = true;
+            state.gameEnding = false;
 
             document.getElementById('gameScore').textContent = '0';
             document.getElementById('hintCount').textContent = state.hintCount;
@@ -14604,7 +14605,8 @@
         }
 
         function endGame(completed = false) {
-            if (!state.gameActive && state.roundFinalized) return;
+            if (state.gameEnding || (!state.gameActive && state.roundFinalized)) return;
+            state.gameEnding = true;
             finalizeRoundMemory(completed);
             state.todayQueue = state.todayQueue.filter(word => !state.completedToday.has(word.wordId));
             updateTodayProgressHeader();

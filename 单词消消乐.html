@@ -13212,12 +13212,12 @@
         const ECONOMY_KEY = 'wordmatch_economy';
         const LEVELS = [
             { lv: 1, score: 0, title: '新手上路' },
-            { lv: 2, score: 1500, title: '初窥门径' },
-            { lv: 3, score: 6000, title: '小有所成' },
-            { lv: 4, score: 18000, title: '词汇达人' },
-            { lv: 5, score: 45000, title: '学霸' },
-            { lv: 6, score: 100000, title: '词汇大师' },
-            { lv: 7, score: 250000, title: '词王' }
+            { lv: 2, score: 500, title: '初窥门径' },
+            { lv: 3, score: 1500, title: '渐入佳境' },
+            { lv: 4, score: 3500, title: '词汇达人' },
+            { lv: 5, score: 7000, title: '单词大师' },
+            { lv: 6, score: 12000, title: '学霸' },
+            { lv: 7, score: 20000, title: '词王' }
         ];
         const SHOP_ITEMS = {
             hint:   { name: '提示', price: 10, icon: '💡' },
@@ -13345,12 +13345,10 @@
             },
 
             getStreakReward(streak) {
-                let coins = 5 + Math.min(streak, 10);
-                let gems = 0;
-                if (streak >= 3) coins += 5;
-                if (streak >= 7) gems += 1;
-                if (streak >= 30) gems += 3;
-                return { coins, gems };
+                if (streak >= 30) return { coins: 200, gems: 10 };
+                if (streak >= 7) return { coins: 50, gems: 3 };
+                if (streak >= 3) return { coins: 15, gems: 1 };
+                return { coins: 5, gems: 0 };
             }
         };
 
@@ -13360,7 +13358,7 @@
         // ===== Sound Effects System (Web Audio API) =====
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
-        let audioUnlockPromise = null;
+        // audio unlock state managed via audioUnlocked flag
         const silentAudioCtx = {
             currentTime: 0,
             state: 'running',
@@ -13791,6 +13789,14 @@
             return a;
         }
 
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
         function escapeJs(str) {
             return String(str).replace(/[\\']/g, '\\$&');
         }
@@ -13983,6 +13989,9 @@
             if (perf) perf.selfRating = rating;
             state.selfRatings[word.wordId] = rating;
             word.memoryData.selfRating = rating;
+            // 即时持久化 selfRating，避免刷新后丢失学习评价
+            const mem = MemorySystem.getMemoryForWord(state.level, word, word.sourceIndex);
+            MemorySystem.saveWordMemory(word.wordId, { ...mem, selfRating: rating });
         }
 
         function recordMatchResult(wordIndex, result) {
@@ -14040,12 +14049,12 @@
                 nextReview = now + MemorySystem.shortIntervals.hint;
                 outcome = 'hint';
                 conclusion = '用了提示，稍后再测';
-            } else if (perf.matched && perf.firstTryCorrect) {
+            } else if (perf.matched && perf.firstTryCorrect && perf.selfRating !== 'unknown') {
                 const rating = perf.selfRating;
-                const gain = rating === 'known' ? 2 : rating === 'fuzzy' ? 1 : 1;
+                const gain = rating === 'known' ? 2 : 1;
                 familiarity = Math.min(5, familiarity + gain);
                 if (mem.reviewCount === 0) {
-                    intervalIndex = rating === 'known' ? 2 : rating === 'fuzzy' ? 1 : 0;
+                    intervalIndex = rating === 'known' ? 2 : 1;
                 } else {
                     intervalIndex = Math.min(MemorySystem.intervals.length - 1, intervalIndex + (rating === 'known' ? 2 : 1));
                 }
@@ -14461,11 +14470,14 @@
             state.correct++;
             if (state.combo > state.maxCombo) state.maxCombo = state.combo;
 
-            // Calculate score with combo bonus + multiplier
-            const mult = state.scoreMultiplier || 1;
-            let points = (5 + (state.combo - 1) * 3) * mult;
+            // Calculate score with combo bonus (base 10, +5 per combo)
+            let points = 10 + (state.combo - 1) * 5;
             state.gameScore += points;
             document.getElementById('gameScore').textContent = state.gameScore;
+
+            // Time bonus for correct match
+            state.timeLeft = Math.min(state.totalTime, state.timeLeft + 2);
+            updateTimerDisplay();
 
             // Visual feedback
             tile1.classList.remove('selected');
@@ -14604,6 +14616,10 @@
             state.combo = 0;
             state.wrong++;
             state.scoreMultiplier = 1;
+
+            // Time penalty for wrong match
+            state.timeLeft = Math.max(1, state.timeLeft - 2);
+            updateTimerDisplay();
 
             // Combo break animation
             const comboEl = document.getElementById('comboDisplay');
@@ -14942,8 +14958,14 @@
             // Write to economy
             const prevLevel = EconomySystem.getLevel();
             EconomySystem.addScore(state.gameScore);
-            const coinReward = Math.max(0, Math.round(state.gameScore / 25));
-            const starCount = getResultStarCount(completed, state.correct + state.wrong > 0 ? Math.round((state.correct / (state.correct + state.wrong)) * 100) : 0, isTodayTaskComplete());
+            const accuracy = state.correct + state.wrong > 0 ? Math.round((state.correct / (state.correct + state.wrong)) * 100) : 0;
+            const starCount = getResultStarCount(completed, accuracy, isTodayTaskComplete());
+            // Coin reward: +2 per match, base 10, +5 per star, +10 for 100% accuracy
+            const matchCoins = state.correct * 2;
+            const baseCoins = completed ? 10 : 0;
+            const starCoins = starCount * 5;
+            const perfectCoins = accuracy >= 100 ? 10 : 0;
+            const coinReward = matchCoins + baseCoins + starCoins + perfectCoins;
             const gemReward = starCount >= 3 ? 1 : 0;
             EconomySystem.addCoins(coinReward);
             if (gemReward > 0) EconomySystem.addGems(gemReward);
@@ -14974,10 +14996,11 @@
         }
 
         function getResultStarCount(completed, accuracy, todayDone) {
-            if (todayDone && accuracy >= 85) return 3;
-            if (completed && accuracy >= 85) return 3;
-            if (completed && accuracy >= 60) return 2;
-            return 1;
+            if (todayDone && accuracy >= 90) return 3;
+            if (completed && accuracy >= 90) return 3;
+            if (completed && accuracy >= 70) return 2;
+            if (completed && accuracy >= 50) return 1;
+            return 0;
         }
 
         function animateScoreNumber(el, from, to, duration, frameKey, withSound = false) {
@@ -15017,7 +15040,12 @@
             const badge = document.getElementById('resultIcon');
             const stars = [...document.querySelectorAll('#resultStars .star')];
             const starCount = getResultStarCount(completed, accuracy, todayDone);
-            const coinReward = Math.max(0, Math.round(state.gameScore / 25));
+            // Coin reward must match endGame() formula
+            const matchCoins = state.correct * 2;
+            const baseCoins = completed ? 10 : 0;
+            const starCoins = starCount * 5;
+            const perfectCoins = accuracy >= 100 ? 10 : 0;
+            const coinReward = matchCoins + baseCoins + starCoins + perfectCoins;
             const gemReward = starCount >= 3 ? 1 : 0;
             SFX.settlementStart(todayDone);
 
@@ -15093,10 +15121,11 @@
                     outcome: 'learning',
                     conclusion: '继续巩固，稍后再测'
                 };
+                const safeEn = escapeHtml(w.en);
                 return `<div class="word-item">
-                    <span class="speak-icon" onclick="pronounceWord('${w.en.replace(/'/g, "\\'")}')">🔊</span>
-                    <span class="en">${w.en}</span>
-                    <span class="cn">${getDisplayMeanings(w)}</span>
+                    <span class="speak-icon" onclick="pronounceWord('${safeEn.replace(/'/g, "\\'")}')">🔊</span>
+                    <span class="en">${safeEn}</span>
+                    <span class="cn">${escapeHtml(getDisplayMeanings(w))}</span>
                     ${formatResultStatus(result)}
                 </div>`;
             }).join('');
@@ -15115,10 +15144,6 @@
             state.roundFinalized = false;
             updateTodayProgressHeader();
             startLearning();
-        }
-
-        function nextLevel() {
-            continueTodayTask();
         }
 
         function goHome() {

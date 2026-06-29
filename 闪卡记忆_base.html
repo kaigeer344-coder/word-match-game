@@ -11436,6 +11436,15 @@
 
         
 
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function shuffle(arr) {
             const a = [...arr];
             for (let i = a.length - 1; i > 0; i--) {
@@ -11719,7 +11728,7 @@
                 intervalIndex,
                 nextReview,
                 reviewCount: mem.reviewCount + 1,
-                correctCount: mem.correctCount + 1,
+                correctCount: mem.correctCount + (rating !== 'unknown' ? 1 : 0),
                 selfRating: rating,
                 lastReview: now,
                 firstLearnedAt: mem.firstLearnedAt || now
@@ -11771,7 +11780,7 @@
             } else {
                 list.innerHTML = state.roundResults.map(r => `
                     <div class="rating-row">
-                        <span><strong>${r.en}</strong> ${r.cn}</span>
+                        <span><strong>${escapeHtml(r.en)}</strong> ${escapeHtml(r.cn)}</span>
                         <span class="rating-badge ${r.rating}">${ratingLabel(r.rating)}</span>
                     </div>
                 `).join('');

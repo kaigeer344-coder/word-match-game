@@ -340,3 +340,109 @@
 | 第 6 步 | 连胜、引导、打磨 | 上线级产品 |
 
 这样分 7 步走，每步都能拿到独立的 Session ID 和截图，写参赛帖时素材足够。
+
+
+---
+
+## 修正提示：把当前 `trae/闪卡记忆.html` 修到可运行并对齐完整结构
+
+> 使用方式：把下面整段 Prompt 复制进 Trae 的新会话。Trae 当前修改的版本保存在 `/Users/adminmima0000/Desktop/trae比赛项目/trae/闪卡记忆.html`。请基于这个文件进行修改，修改后仍然保存到同一个路径。
+
+我已经把前 6 步的功能基本都加上了，但现在这个版本还有不少运行时 bug 和流程问题，需要一次性修正好。请你按下面清单逐项处理，每改完一项自己验证一下。
+
+### 一、立即修复运行时崩溃
+
+1. **补齐缺失的 SFX 方法**：`const SFX = { ... }` 里现在缺少以下 7 个被调用到的方法，运行到这些地方会直接报错。请给它们补上简单的 Web Audio 音效实现（可直接用现有 SFX 方法类似的写法）：
+   - `SFX.streakClaim()`（约 12478 行，领取连胜奖励时调用）
+   - `SFX.taskStart()`（约 13462 行，开始学习任务时调用）
+   - `SFX.learningCard()`（约 13523 行，显示新卡片时调用）
+   - `SFX.selfRate(rating)`（约 13640 行，标记认识/模糊/不认识时调用）
+   - `SFX.hint()`（约 13907 行，使用提示道具时调用）
+   - `SFX.shuffle()`（约 13957 行，使用重排道具时调用）
+   - `SFX.taskComplete()`（约 14078 行，完成今日任务时调用）
+
+2. **修复闪卡翻转没效果的问题**：`flipCard()` 会 toggle `flipped` class，但 CSS 里只有 `.flashcard .meaning` 且 `opacity: 1`，没有 `.flashcard.flipped .meaning` 规则。请加上：
+   - 默认状态 `.flashcard .meaning` 的 `opacity` 为 0（隐藏释义）
+   - `.flashcard.flipped .meaning` 的 `opacity` 为 1（显示释义）
+   - 保留现有的 `transition` 和 3D 翻转动画
+
+### 二、修正学习流程：让「模糊/不认识」的词在同一轮里继续出现
+
+现在的逻辑是：用户点「模糊」或「不认识」后，`markWord()` 调用 `requeueWord(word, updatedMem.nextReview)`，把 `nextReviewAt` 设到几分钟后。但 `getNextDueWord()` 只取 `nextReviewAt <= now` 的词，所以这些词在当前学习轮次里再也不会出现，学习直接结束了。
+
+请改成：
+- 新增一个 `state.sessionReviewQueue`（或类似名字），专门存放本轮需要反复复习的模糊/不认识单词。
+- 在 `markWord()` 里，如果 rating 是 `fuzzy` 或 `unknown`，把这个词 push 到 `sessionReviewQueue` 的末尾，而不是只改 `nextReviewAt`。
+- 修改 `getNextDueWord()` 的优先级：
+  1. 先取 `sessionReviewQueue` 里不是 `known` 的词（即本轮被标为 fuzzy/unknown 还需要再练的）。
+  2. 再取 `todayQueue` 里正常的到期词。
+- 一个词被再次取出展示时，如果这次被标为 `known`，就从 `sessionReviewQueue` 里移除，并加入 `completedToday`；如果还是 fuzzy/unknown，继续留在队列末尾循环。
+- `known` 的词仍然按原来的逻辑安排到未来某天复习（1 天、3 天、7 天…）。
+
+这样用户在一次学习任务里，没记住的词会一直循环出现，直到被标记为「认识」才结束。
+
+### 三、让配对游戏成为学习结束后的必经环节
+
+现在的流程是：学习结束 → 显示完成页 → 用户手动点「单词连连看」才进入游戏。请改成：
+- 当 `getNextDueWord()` 返回 null（说明本轮所有词都已掌握），不要直接调用 `showCompletionSummary()`。
+- 而是自动调用 `startReviewGame()`，用 `state.roundResults` 里本轮学过的词进入配对游戏。
+- 游戏结束后，再调用 `showCompletionSummary()` 显示最终结果。
+- 完成页上的「单词连连看」按钮可以保留，但只在用户从首页手动进入复习模式时使用；正常今日任务流程里游戏是自动触发的。
+
+### 四、修复完成页，让它真正显示游戏结果
+
+现在的 `showCompletionSummary()` 没有接收 `endGame()` 传进来的参数，导致得分、连击、星级、金币、宝石、升级横幅全部不显示。
+
+请改成：
+- `showCompletionSummary(gameResult)` 接收游戏结果对象（包含 `score`、`maxCombo`、`accuracy`、`matchedPairs`、`coinsEarned`、`gemsEarned`、`levelResult` 等）。
+- 在完成页顶部显示：
+  - 本局得分
+  - 最高连击
+  - 正确率
+  - 星星数（正确率 90% 以上 3 颗，70% 以上 2 颗，50% 以上 1 颗）
+  - 本局获得的金币和宝石
+- 如果 `levelResult.leveledUp` 为 true，让 `levelUpBanner` 显示出来，并显示 `Lv.X → Lv.Y`。
+- 下方仍然保留本轮单词的「认识/模糊/不认识」回顾列表。
+- 标题根据状态变化：正常任务完成显示「今日学习完成 🎉」；手动复习游戏结束可以显示「复习完成 🎉」。
+
+### 五、让配对游戏也能更新单词记忆数据
+
+现在配对游戏只影响金币、分数、连击，不影响 SRS 记忆状态。请恢复或实现：
+- 配对成功：该词的记忆数据可以视为一次正向反馈，适当增加 familiarity 或 consecutiveCorrect（参考 `applyRating` 的 known 逻辑做轻量版）。
+- 配对失败（点错配对）：如果是某个词被点错，可以适当降低 familiarity 或增加 wrongCount。
+- 游戏超时：本轮未匹配完的词可以视为超时/未掌握，更新其记忆状态为需要复习。
+- 使用提示：被提示的词可以视为未完全掌握，不要增加 consecutiveCorrect。
+
+不需要完全照搬原版，但要保证：游戏里的表现会反馈到 MemorySystem，影响这些词下次什么时候再出现。
+
+### 六、修复道具使用的细节 bug
+
+1. **`useHint()` 找不到可配对卡片时不应该扣减道具**：现在循环结束后再 `progress.hints--`，即使没有找到 partner 也会扣。请改成：先找到一对可配对的卡片，高亮显示后，**确认成功**再扣减 `hints`。
+2. **`useShuffle()` 后清空已选状态**：重排后请把 `state.gameSelected` 清空，并把已选卡片的 `selected` class 去掉，防止下一轮点击逻辑异常。
+3. **道具名称统一**：提示里说的是「+10 秒」，但代码里是 `useTimeFreeze()` 暂停 5 秒。请统一成 `useTimeBonus()` 并恢复 +10 秒逻辑；同时更新按钮文字和库存字段名，避免 confusion。
+4. **新用户默认道具**：第一次使用时 `progress.hints`、`timeFreezes`、`shuffles` 都是 0，导致进了游戏也没道具可用。请在 `initProgress()` 或首次启动时给新用户赠送默认库存：提示 3 个、时间 2 个、重排 1 个。
+
+### 七、统一本地数据前缀并兼容旧数据
+
+现在 Trae 版用了 `wordmatch_progress`、`wordmatch_streak`、`wordmatch_onboarded` 等键，而原版用 `wordmatch_economy`。如果用户之前玩过原版，旧的金币、宝石、连胜会丢失。请做兼容：
+- 启动时检测 `localStorage` 里是否有 `wordmatch_economy`。
+- 如果有，把里面的 `coins`、`gems`、`totalScore`、`streak`、`shopItems` 等迁移到新的 `wordmatch_progress` 结构里。
+- 迁移完成后删除或标记旧键，避免重复迁移。
+
+### 八、补齐缺失的 CSS 和页面结构
+
+1. 检查并补全以下 CSS 类：`.stats-screen`、`.settings-screen`、`.nav-label` 等，确保统计页、设置页、底部导航文字样式正常。
+2. 检查 `#statsScreen`、`#settingsScreen`、`#bottomNav`、`#shopModal`、`#streakModal` 等 DOM 结构是否完整，对应的 JS 函数引用的 ID 必须存在。
+3. `renderHeaderStats()` 现在名不副实，只在设置页打开时才刷新设置页。请让它真正刷新首页/学习页顶部的等级、金币、宝石显示，或者在相关状态变化时直接更新对应 DOM。
+
+### 九、最终验证清单
+
+修改完成后，请逐项检查：
+- 用 `node --check` 或浏览器控制台检查 JS 没有语法错误。
+- 所有 `document.getElementById()` 和 `querySelector()` 引用的 ID，在 HTML 里都存在。
+- 所有 `onclick="..."` 调用的函数都已定义。
+- 所有 `SFX.xxx()` 调用在 `SFX` 对象里都有定义。
+- 手动走一遍完整流程：首页 → 开始今日任务 → 学习若干词（故意点几个「不认识」看是否会循环出现）→ 自动进入游戏 → 玩到结束 → 完成页显示得分/连击/星级/金币/宝石 → 返回首页 → 切换统计/设置页 → 刷新页面后数据还在。
+- 在 iPhone 390px 宽度下没有横向滚动，按钮不会被底部导航挡住。
+
+完成以上修复后，把文件保存回 `/Users/adminmima0000/Desktop/trae比赛项目/trae/闪卡记忆.html`，并告诉我你修改了哪些地方、还有没有报错。
